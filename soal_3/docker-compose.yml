@@ -1,0 +1,28 @@
+services:
+  libraryit-server:
+    build: .
+    container_name: libraryit-server
+    ports:
+      - "1445:445"
+      - "139:139"
+    volumes:
+      - ./data/ebooks:/libraryit/ebooks
+      - ./data/papers:/libraryit/papers
+      - ./data/sourcecode:/libraryit/sourcecode
+      - ./data/docs:/libraryit/docs
+      - ./logs:/libraryit/logs
+    restart: unless-stopped
+
+  libraryit-logger:
+    image: ubuntu:latest
+    container_name: libraryit-logger
+    depends_on:
+      - libraryit-server
+    volumes:
+      - ./logs:/libraryit/logs
+    command: >
+      bash -c "
+        echo 'LibraryIT Logger started. Monitoring log...';
+        tail -F /libraryit/logs/libraryit.log
+      "
+    restart: unless-stopped

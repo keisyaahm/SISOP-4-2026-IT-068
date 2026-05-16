@@ -3,31 +3,17 @@
 
 **Nama:** Keisya Halimah Mulia  
 **NRP:** 5027251068  
-**Kelas:** A
+**Kelas:** A / Teknologi Informasi  
+**Repository:** [SISOP-4-2026-IT-068](https://github.com/keisyaahm/SISOP-4-2026-IT-068)
 
 ---
 
 ## Daftar Isi
 
 - [Persiapan Direktori dan Repository](#persiapan-direktori-dan-repository)
-- [Soal 1: Save Asisten Kenz (FUSE Passthrough + Virtual File)](#soal-1-save-asisten-kenz)
-  - [Deskripsi Soal 1](#deskripsi-soal-1)
-  - [Penjelasan Kode Soal 1](#penjelasan-kode-soal-1)
-  - [Cara Kompilasi dan Menjalankan Soal 1](#cara-kompilasi-dan-menjalankan-soal-1)
-  - [Output dan Hasil Soal 1](#output-dan-hasil-soal-1)
-  - [Error dan Solusi Soal 1](#error-dan-solusi-soal-1)
-- [Soal 2: Poke MOO (FUSE Enkripsi XOR + Docker + Client)](#soal-2-poke-moo)
-  - [Deskripsi Soal 2](#deskripsi-soal-2)
-  - [Penjelasan Kode Soal 2](#penjelasan-kode-soal-2)
-  - [Cara Kompilasi dan Menjalankan Soal 2](#cara-kompilasi-dan-menjalankan-soal-2)
-  - [Output dan Hasil Soal 2](#output-dan-hasil-soal-2)
-  - [Error dan Solusi Soal 2](#error-dan-solusi-soal-2)
-- [Soal 3: LibraryIT (Docker + Samba)](#soal-3-libraryit)
-  - [Deskripsi Soal 3](#deskripsi-soal-3)
-  - [Penjelasan Kode Soal 3](#penjelasan-kode-soal-3)
-  - [Cara Menjalankan Soal 3](#cara-menjalankan-soal-3)
-  - [Output dan Hasil Soal 3](#output-dan-hasil-soal-3)
-  - [Error dan Solusi Soal 3](#error-dan-solusi-soal-3)
+- [Soal 1: Save Asisten Kenz](#soal-1-save-asisten-kenz)
+- [Soal 2: Poke MOO](#soal-2-poke-moo)
+- [Soal 3: LibraryIT](#soal-3-libraryit)
 
 ---
 
@@ -39,19 +25,15 @@ git init
 git remote add origin https://github.com/keisyaahm/SISOP-4-2026-IT-068.git
 git branch -M main
 
-# Struktur folder
 mkdir -p soal_1/mnt
 mkdir -p soal_2/{encrypted_storage/tests,fuse_mount}
 mkdir -p soal_3/{data/{ebooks,papers,sourcecode,docs},logs}
 
-# .gitignore soal_1
 cat > soal_1/.gitignore << 'EOF'
 kenz_rescue
 mnt/
-amba_files/
 EOF
 
-# .gitignore soal_2
 cat > soal_2/.gitignore << 'EOF'
 fuse
 fuse_mount/
@@ -64,13 +46,15 @@ git commit -m "init: setup struktur repo modul 4"
 git push -u origin main
 ```
 
-Struktur repository yang masuk GitHub:
+Struktur akhir repository:
+
 ```
 SISOP-4-2026-IT-068/
 ├── soal_1/
 │   ├── kenz_rescue.c
 │   └── amba_files/
-│       ├── 1.txt ... 7.txt
+│       ├── 1.txt
+│       └── ... 7.txt
 ├── soal_2/
 │   ├── fuse.c
 │   ├── client.c
@@ -93,44 +77,65 @@ SISOP-4-2026-IT-068/
 
 ## Soal 1: Save Asisten Kenz
 
-### Deskripsi Soal 1
+### Penjelasan Soal
 
-Sebastian menemukan flashdisk berisi 7 file log ekspedisi (`1.txt` s/d `7.txt`). Setiap file punya satu baris `KOORD: <fragmen>`. Ia harus menggabungkan fragmen dari semua file tanpa mengubah isi flashdisk.
+Sebastian menemukan flashdisk berisi 7 file log ekspedisi (`1.txt` s/d `7.txt`). Setiap file punya satu baris `KOORD: <fragmen>`. Tujuannya adalah menggabungkan semua fragmen koordinat tanpa mengubah isi flashdisk satu byte pun.
 
-Soal minta membuat program FUSE `kenz_rescue.c` dengan 4 poin:
+Program FUSE `kenz_rescue.c` dibuat dengan 4 poin:
 
-**Poin A** — Download arsip `amba_files.zip`, unzip ke `amba_files/`, hapus zip-nya.
+- **Poin A** — Download `amba_files.zip`, unzip ke `amba_files/`, hapus zip-nya
+- **Poin B** — FUSE passthrough: `cat mnt/1.txt` identik dengan `cat amba_files/1.txt`
+- **Poin C** — File virtual `tujuan.txt` muncul di `ls mnt/` tapi tidak ada di `amba_files/`
+- **Poin D** — `cat mnt/tujuan.txt` menghasilkan konten on-the-fly dengan format `Tujuan Mas Amba: <gabungan KOORD>\n`
 
-**Poin B** — FUSE passthrough: `cat mnt/1.txt` = `cat amba_files/1.txt` (byte-identical).
+Struct FUSE yang digunakan:
 
-**Poin C** — Tambahkan file virtual `tujuan.txt` di mount directory. File ini muncul di `ls mnt/` tapi tidak ada fisiknya di `amba_files/`.
+```c
+static struct fuse_operations kenz_ops = {
+    .getattr = kenz_getattr,
+    .readdir = kenz_readdir,
+    .open    = kenz_open,
+    .read    = kenz_read,
+};
 
-**Poin D** — Saat `cat mnt/tujuan.txt`, isi dibuat on-the-fly dengan menggabungkan semua fragmen `KOORD:` dari `1.txt`–`7.txt`, format: `Tujuan Mas Amba: <gabungan>\n`.
+int main(int argc, char *argv[]) {
+    if (realpath(argv[1], source_dir) == NULL) {
+        perror("realpath"); return 1;
+    }
+    // Teruskan argv[2] (mount point) ke fuse_main
+    char *fuse_argv[3];
+    fuse_argv[0] = argv[0];
+    fuse_argv[1] = argv[2];
+    fuse_argv[2] = NULL;
+    return fuse_main(2, fuse_argv, &kenz_ops, NULL);
+}
+```
 
 ---
 
-### Penjelasan Kode Soal 1
-
-#### Poin A — Download dan Setup
+### Poin A — Download dan Setup
 
 ```bash
 cd ~/SISOP-4-2026-IT-068/soal_1
-curl -L "https://drive.google.com/uc?export=download&id=1nLXFhptDo2mnUlZsw8pTWyAVpV49W20U" -o amba_files.zip
+curl -L "https://drive.google.com/uc?export=download&id=1nLXFhptDo2mnUlZsw8pTWyAVpV49W20U" \
+  -o amba_files.zip
 unzip amba_files.zip
 rm amba_files.zip   # wajib dihapus sesuai soal
 ls amba_files/      # harus muncul 1.txt s/d 7.txt
 ```
 
-#### Poin B — Passthrough (getattr, readdir, open, read)
+---
 
-Semua operasi untuk file `1.txt`–`7.txt` diteruskan langsung ke source directory menggunakan path fisik yang dibangun dari `source_dir + path`:
+### Poin B — Passthrough (getattr, readdir, open, read)
+
+Semua operasi untuk file `1.txt`–`7.txt` diteruskan langsung ke source directory. Helper `build_path` membangun path fisik dari `source_dir + virtual path`:
 
 ```c
 static void build_path(char *buf, size_t size, const char *path) {
     snprintf(buf, size, "%s%s", source_dir, path);
 }
 
-// getattr passthrough — ambil metadata dari file fisik
+// getattr passthrough
 char real[PATH_MAX];
 build_path(real, sizeof(real), path);
 int res = lstat(real, st);
@@ -142,35 +147,37 @@ while ((de = readdir(dp)) != NULL) {
     filler(buf, de->d_name, NULL, 0);
 }
 
-// read passthrough — baca isi file fisik
+// read passthrough
 int fd = open(real, O_RDONLY);
 int res = pread(fd, buf, size, offset);
 ```
 
-#### Poin C — Virtual File tujuan.txt
+---
 
-`tujuan.txt` tidak ada di `amba_files/` tapi harus muncul di `ls mnt/` dan bisa di-`stat`. Ini dicapai dengan membuat stat buatan di `getattr` dan menambahkan entry di `readdir`:
+### Poin C — Virtual File `tujuan.txt`
+
+`tujuan.txt` tidak ada di `amba_files/` tapi harus muncul di `ls mnt/`. Dicapai dengan membuat stat buatan di `getattr` dan menambahkan entry di `readdir`:
 
 ```c
-// getattr — deteksi path /tujuan.txt, return stat buatan
 if (strcmp(path, "/tujuan.txt") == 0) {
     char tmp[4096];
-    int len = generate_tujuan(tmp, sizeof(tmp)); // hitung ukuran on-the-fly
-    st->st_mode  = S_IFREG | 0444; // read-only
+    int len = generate_tujuan(tmp, sizeof(tmp));
+    st->st_mode  = S_IFREG | 0444;  // read-only
     st->st_nlink = 1;
-    st->st_size  = len;
-    // timestamp 0 (epoch) sesuai spesifikasi soal
-    st->st_atime = st->st_mtime = st->st_ctime = 0;
+    st->st_size  = len;             // ukuran konsisten dengan isi
+    st->st_atime = st->st_mtime = st->st_ctime = 0; // timestamp epoch
     return 0;
 }
 
-// readdir — tambahkan tujuan.txt di listing
+// Di readdir — tambahkan entry virtual
 filler(buf, "tujuan.txt", NULL, 0);
 ```
 
-#### Poin D — On-the-fly Content tujuan.txt
+---
 
-Saat `cat mnt/tujuan.txt`, fungsi `generate_tujuan` dipanggil. Fungsi ini membuka `1.txt`–`7.txt` secara berurutan, mencari baris yang diawali `KOORD: `, mengambil nilainya, dan menggabungkannya:
+### Poin D — On-the-fly Content `tujuan.txt`
+
+Saat `cat mnt/tujuan.txt`, fungsi `generate_tujuan` membuka `1.txt`–`7.txt`, mencari baris `KOORD: `, dan menggabungkannya:
 
 ```c
 static int generate_tujuan(char *buf, size_t buf_size) {
@@ -189,7 +196,6 @@ static int generate_tujuan(char *buf, size_t buf_size) {
             if (strncmp(line, "KOORD: ", 7) == 0) {
                 char *val = line + 7;
                 size_t len = strlen(val);
-                // Hapus newline di akhir
                 if (len > 0 && val[len-1] == '\n') val[len-1] = '\0';
                 strncat(result, val, sizeof(result) - strlen(result) - 1);
                 break; // satu KOORD per file
@@ -197,7 +203,6 @@ static int generate_tujuan(char *buf, size_t buf_size) {
         }
         fclose(fp);
     }
-    // Tambah tepat satu newline di akhir (sesuai spesifikasi)
     strncat(result, "\n", sizeof(result) - strlen(result) - 1);
 
     size_t total = strlen(result);
@@ -209,11 +214,9 @@ static int generate_tujuan(char *buf, size_t buf_size) {
 
 ---
 
-### Cara Kompilasi dan Menjalankan Soal 1
+### Cara Kompilasi dan Menjalankan
 
 ```bash
-cd ~/SISOP-4-2026-IT-068/soal_1
-
 # Install dependency
 sudo apt install -y libfuse-dev pkg-config fuse
 
@@ -225,20 +228,21 @@ gcc -Wall -o kenz_rescue kenz_rescue.c $(pkg-config fuse --cflags --libs)
 
 # Verifikasi mount
 mountpoint mnt
-mount | grep fuse_mount
 ```
 
 ---
 
-### Output dan Hasil Soal 1
+### Output dan Hasil
 
 **Test Poin B — Passthrough byte-identical:**
+
 ```bash
 for i in 1 2 3 4 5 6 7; do
     diff mnt/$i.txt amba_files/$i.txt && echo "$i.txt OK"
 done
 ```
-Expected:
+
+Output:
 ```
 1.txt OK
 2.txt OK
@@ -250,61 +254,71 @@ Expected:
 ```
 
 **Test Poin C — Virtual file:**
+
 ```bash
-ls mnt/        # muncul tujuan.txt
+ls mnt/        # ada tujuan.txt
 ls amba_files/ # tidak ada tujuan.txt
 stat mnt/tujuan.txt
 ```
-Expected `stat`:
+
+Output stat:
 ```
 Access: (0444/-r--r--r--)
 Size: 66
+Modify: 1970-01-01 07:00:00
 ```
 
 **Test Poin D — On-the-fly content:**
+
 ```bash
 cat mnt/tujuan.txt
-# Output: Tujuan Mas Amba: <gabungan KOORD dari 7 file>
+# Output: Tujuan Mas Amba: <gabungan koordinat dari 7 file>
 
 wc -c mnt/tujuan.txt
-# Angka harus sama dengan Size di stat
+# Angka harus sama dengan Size di stat (66)
 ```
 
+![Output FUSE Soal 1 — ls mnt/, cat mnt/tujuan.txt, stat, dan diff passthrough](./assets/soal1.png)
+
+> **Gambar:** Hasil `ls mnt/` menampilkan 8 entry (7 passthrough + 1 virtual), `diff` semua file OK, `cat mnt/tujuan.txt` menghasilkan koordinat lengkap, dan `stat` menunjukkan size konsisten.
+
 **Unmount:**
+
 ```bash
 fusermount -u mnt
-mountpoint mnt  # harus: mnt is not a mountpoint
-ls mnt/         # harus kosong
+mountpoint mnt   # mnt is not a mountpoint
+ls mnt/          # kosong
 ```
 
 ---
 
-### Error dan Solusi Soal 1
+### Error dan Solusi
 
-**Error 1 — Warning compile: `'%d' directive output may be truncated`**
-
-Muncul saat compile karena buffer `PATH_MAX` (4096) secara teoritis bisa penuh jika dikombinasikan dengan format string `%s/%d.txt`.
+**Error 1 — Warning compile `'%d' directive output may be truncated`**
 
 ```
 kenz_rescue.c:29:50: warning: '%d' directive output may be truncated
 ```
 
-Solusi: Perbesar ukuran buffer filepath menjadi `PATH_MAX * 2`:
+Penyebab: Buffer `PATH_MAX` (4096) secara teoritis bisa penuh jika path panjang dikombinasikan dengan `%s/%d.txt`.
+
+Solusi: Perbesar buffer filepath:
+
 ```c
 // Sebelum
 char filepath[PATH_MAX];
 
-// Sesudah
+// Sesudah — beri ruang lebih
 char filepath[PATH_MAX * 2];
 ```
 
 **Error 2 — `cat mnt/tujuan.txt: No such file or directory`**
 
-Terjadi saat working directory salah (masih di dalam `amba_files/` bukan di `soal_1/`).
+Penyebab: Working directory salah — masih berada di dalam `amba_files/`.
 
 Solusi:
 ```bash
-cd ~/SISOP-4-2026-IT-068/soal_1  # pastikan di folder soal_1
+cd ~/SISOP-4-2026-IT-068/soal_1
 cat mnt/tujuan.txt
 ```
 
@@ -312,39 +326,51 @@ cat mnt/tujuan.txt
 
 ## Soal 2: Poke MOO
 
-### Deskripsi Soal 2
+### Penjelasan Soal
 
-MOO ingin mini-database service yang aman. Semua file yang dibuat lewat `fuse_mount` harus terenkripsi otomatis menggunakan XOR key `0x76` dan disimpan di `encrypted_storage` dengan ekstensi `.enc`.
+MOO ingin mini-database service yang aman dari pengintip. Semua file yang dibuat lewat `fuse_mount` harus terenkripsi XOR key `0x76` dan disimpan di `encrypted_storage` dengan ekstensi `.enc`.
 
-**Poin A & B** — FUSE penuh dengan 12 operasi: `getattr`, `readdir`, `mkdir`, `rmdir`, `create`, `open`, `read`, `write`, `truncate`, `unlink`, `access`, `utimens`. `fuse_mount` berfungsi seperti filesystem biasa.
+- **Poin A & B** — FUSE lengkap 12 operasi: `getattr`, `readdir`, `mkdir`, `rmdir`, `create`, `open`, `read`, `write`, `truncate`, `unlink`, `access`, `utimens`
+- **Poin C** — Enkripsi/dekripsi XOR on-the-fly: `halo.txt` di fuse_mount → `halo.txt.enc` di encrypted_storage
+- **Poin D** — `notes.csv.enc` di `encrypted_storage/tests/` → terbaca plaintext lewat `fuse_mount/tests/notes.csv`
+- **Containerization** — Image Docker `soal-2-modul-4-sisop`, container `db_app` dengan bind mount
+- **Integration** — `client.c` TCP interaktif ke server port 9000
 
-**Poin C** — Enkripsi/dekripsi XOR on-the-fly:
-- Tulis `halo.txt` di `fuse_mount` → tersimpan sebagai `halo.txt.enc` di `encrypted_storage` (isi terenkripsi)
-- Baca `halo.txt` di `fuse_mount` → dibaca dari `halo.txt.enc` dan didekripsi otomatis
+Struct FUSE yang digunakan:
 
-**Poin D** — Download `notes.csv.enc` ke `encrypted_storage/tests/`. Baca lewat `fuse_mount/tests/notes.csv` → harus terdekripsi.
-
-**Containerization** — Build image Docker `soal-2-modul-4-sisop`, jalankan container `db_app` dengan bind mount `fuse_mount` ke `/app/db`.
-
-**Integration** — Buat `client.c` untuk berinteraksi dengan server via TCP port 9000.
+```c
+static struct fuse_operations moo_ops = {
+    .getattr  = moo_getattr,
+    .access   = moo_access,
+    .readdir  = moo_readdir,
+    .mkdir    = moo_mkdir,
+    .rmdir    = moo_rmdir,
+    .create   = moo_create,
+    .open     = moo_open,
+    .read     = moo_read,
+    .write    = moo_write,
+    .truncate = moo_truncate,
+    .unlink   = moo_unlink,
+    .utimens  = moo_utimens,
+};
+```
 
 ---
 
-### Penjelasan Kode Soal 2
+### Poin A & B — FUSE Penuh dengan Enkripsi
 
-#### Poin A & B — FUSE Penuh
-
-Semua 12 operasi diimplementasikan. Path di `fuse_mount` dipetakan ke path `.enc` di `encrypted_storage`:
+Semua path file di `fuse_mount` dipetakan ke `.enc` di `encrypted_storage`:
 
 ```c
-// Untuk file: tambahkan .enc
+// Untuk file: tambahkan ekstensi .enc
 snprintf(enc_path, sizeof(enc_path), "%s%s.enc", enc_storage, path);
 
 // Untuk folder: tidak tambahkan .enc
 snprintf(dir_path, sizeof(dir_path), "%s%s", enc_storage, path);
 ```
 
-`readdir` menampilkan nama file tanpa `.enc` dengan cara memotong ekstensi saat listing:
+`readdir` menampilkan nama file tanpa ekstensi `.enc`:
+
 ```c
 // Hapus .enc dari nama saat ditampilkan ke user
 size_t len = strlen(display_name);
@@ -354,9 +380,11 @@ if (len > 4 && strcmp(display_name + len - 4, ".enc") == 0) {
 filler(buf, display_name, NULL, 0);
 ```
 
-#### Poin C — Enkripsi/Dekripsi XOR On-the-fly
+---
 
-XOR key `0x76` dipakai untuk enkripsi dan dekripsi (operasi XOR bersifat reversibel):
+### Poin C — Enkripsi/Dekripsi XOR On-the-fly
+
+XOR bersifat reversibel — operasi enkripsi dan dekripsi identik:
 
 ```c
 #define XOR_KEY 0x76
@@ -367,25 +395,27 @@ static void xor_buffer(char *buf, size_t size) {
     }
 }
 
-// READ: baca .enc → XOR → tampilkan plaintext
+// READ: baca .enc → XOR → tampilkan plaintext ke user
 static int moo_read(...) {
     int res = pread(fd, buf, size, offset);
-    xor_buffer(buf, res); // dekripsi on-the-fly
+    xor_buffer(buf, res);   // dekripsi on-the-fly
     return res;
 }
 
-// WRITE: terima plaintext → XOR → simpan ke .enc
+// WRITE: terima plaintext dari user → XOR → simpan ke .enc
 static int moo_write(...) {
     char *enc_buf = malloc(size);
     memcpy(enc_buf, buf, size);
-    xor_buffer(enc_buf, size); // enkripsi on-the-fly
+    xor_buffer(enc_buf, size);   // enkripsi on-the-fly
     int res = pwrite(fd, enc_buf, size, offset);
     free(enc_buf);
     return res;
 }
 ```
 
-#### Dockerfile
+---
+
+### Containerization — Dockerfile
 
 ```dockerfile
 FROM ubuntu:latest
@@ -396,27 +426,50 @@ EXPOSE 9000
 CMD ["./server"]
 ```
 
-#### client.c — TCP Client Interaktif
+```bash
+# Build image
+docker build -t soal-2-modul-4-sisop .
+
+# Jalankan container dengan bind mount fuse_mount ke /app/db
+docker run -d \
+  --name db_app \
+  -p 9000:9000 \
+  -v $(pwd)/fuse_mount:/app/db \
+  soal-2-modul-4-sisop
+
+docker ps -a | grep db_app
+```
+
+---
+
+### Integration — `client.c`
 
 ```c
 // Connect ke server port 9000
 sock = socket(AF_INET, SOCK_STREAM, 0);
 connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
-// Loop interaktif: input dari user → kirim → terima balasan
+// Loop interaktif
 while (1) {
     printf("db > ");
     fgets(send_buf, sizeof(send_buf), stdin);
-    // strip newline, tambah \n sebagai terminator
     send(sock, send_buf, strlen(send_buf), 0);
     int n = recv(sock, recv_buf, sizeof(recv_buf) - 1, 0);
     printf("%s", recv_buf);
 }
 ```
 
+```bash
+# Compile
+gcc -Wall -o client client.c
+
+# Jalankan
+./client
+```
+
 ---
 
-### Cara Kompilasi dan Menjalankan Soal 2
+### Cara Kompilasi dan Menjalankan
 
 ```bash
 cd ~/SISOP-4-2026-IT-068/soal_2
@@ -424,56 +477,62 @@ cd ~/SISOP-4-2026-IT-068/soal_2
 # Compile FUSE
 gcc -Wall -o fuse fuse.c $(pkg-config fuse --cflags --libs)
 
-# Mount FUSE
+# Mount (jalankan sebelum Docker)
 ./fuse encrypted_storage fuse_mount
-mountpoint fuse_mount  # verifikasi
-
-# Build Docker image
-docker build -t soal-2-modul-4-sisop .
-
-# Jalankan container dengan bind mount
-docker run -d \
-  --name db_app \
-  -p 9000:9000 \
-  -v $(pwd)/fuse_mount:/app/db \
-  soal-2-modul-4-sisop
-
-# Compile client
-gcc -Wall -o client client.c
-
-# Jalankan client
-./client
+mountpoint fuse_mount
 ```
 
 ---
 
-### Output dan Hasil Soal 2
+### Output dan Hasil
 
 **Test Poin B & C — Enkripsi XOR:**
+
 ```bash
 echo "isinya ini harusnya" > fuse_mount/file1.txt
 
-# Baca lewat fuse_mount → plaintext
 cat fuse_mount/file1.txt
-# Output: isinya ini harusnya
+# Output: isinya ini harusnya  (plaintext)
 
-# Cek file .enc tersimpan di encrypted_storage
 ls encrypted_storage/
-# Output: file1.txt.enc
+# Output: file1.txt.enc  tests/
 
-# Cek isi .enc → terenkripsi (karakter aneh)
 cat encrypted_storage/file1.txt.enc
-# Output: karakter garbled (VV|...)
+# Output: VV|... (karakter terenkripsi — tidak terbaca)
 ```
 
-**Test Poin D — notes.csv.enc:**
+**Test Poin D — `notes.csv.enc` terdekripsi:**
+
 ```bash
 cat fuse_mount/tests/notes.csv
-# Output: author,notes
-#         admin,TEST_SUCCESS
+# Output:
+# author,notes
+# admin,TEST_SUCCESS
 ```
 
+![Output FUSE Soal 2 — enkripsi XOR, ls encrypted_storage, cat fuse_mount, cat .enc](./assets/soal2_fuse.png)
+
+> **Gambar:** `cat fuse_mount/file1.txt` menampilkan plaintext, `cat encrypted_storage/file1.txt.enc` menampilkan data terenkripsi, dan `cat fuse_mount/tests/notes.csv` berhasil mendekripsi `notes.csv.enc`.
+
+**Test Docker:**
+
+```bash
+docker images | grep soal-2-modul-4-sisop
+docker ps -a | grep db_app
+```
+
+Output:
+```
+soal-2-modul-4-sisop   latest   xxxx   100MB
+db_app   Up X seconds   0.0.0.0:9000->9000/tcp
+```
+
+![Output Docker — docker images dan docker ps](./assets/soal2_docker.png)
+
+> **Gambar:** Image `soal-2-modul-4-sisop` berhasil di-build dan container `db_app` berjalan dengan port 9000 ter-expose.
+
 **Test Integration — Client:**
+
 ```
 Connected to DB Server on port 9000
 Type HELP for available commands
@@ -486,9 +545,13 @@ TABLE CREATED
 
 db > LIST DATABASE
 tests
+
+db > LIST TABLE tests
+users.csv
 ```
 
 **Verifikasi file terenkripsi dari operasi database:**
+
 ```bash
 ls encrypted_storage/tests/
 # Output: history.log.enc  users.csv.enc
@@ -496,18 +559,18 @@ ls encrypted_storage/tests/
 
 ---
 
-### Error dan Solusi Soal 2
+### Error dan Solusi
 
 **Error 1 — `fuse: mountpoint is not empty`**
-
-Terjadi saat `fuse_mount` sudah berisi data dari Docker bind mount sebelumnya.
 
 ```
 ./fuse encrypted_storage fuse_mount
 fuse: mountpoint is not empty
 ```
 
-Solusi: Unmount dulu, lalu mount ulang dengan flag `nonempty`:
+Penyebab: Docker bind mount mengisi `fuse_mount` sebelum FUSE di-mount.
+
+Solusi:
 ```bash
 fusermount -u fuse_mount 2>/dev/null
 ./fuse encrypted_storage fuse_mount -o nonempty
@@ -515,12 +578,12 @@ fusermount -u fuse_mount 2>/dev/null
 
 **Error 2 — `realpath encrypted_storage: No such file or directory`**
 
-Flag `-o` diletakkan sebelum argumen source dan mount, sehingga FUSE salah parsing.
-
 ```
 ./fuse -o nonempty encrypted_storage fuse_mount
 realpath encrypted_storage: No such file or directory
 ```
+
+Penyebab: Flag `-o` diletakkan sebelum argumen source dan mount.
 
 Solusi: Flag `-o` harus di akhir:
 ```bash
@@ -542,12 +605,10 @@ Solusi:
 ```bash
 sudo nano /etc/fuse.conf
 # Uncomment baris: user_allow_other
-# Pastikan ada di baris sendiri tanpa komentar di baris yang sama
+# Pastikan di baris sendiri tanpa teks lain
 ```
 
 **Error 4 — `bind: Address already in use`**
-
-Port 9000 sudah dipakai proses lain.
 
 ```
 ./server
@@ -561,14 +622,14 @@ sudo kill -9 $(sudo lsof -t -i :9000)
 
 **Error 5 — `ERROR: Database not found` setelah `CREATE DATABASE`**
 
-Server binary hardcode path `/app/db` yang tidak ada di host.
-
 ```
 db > CREATE DATABASE tests
 DATABASE CREATED
 db > CREATE TABLE tests users email password
 ERROR: Database not found
 ```
+
+Penyebab: Server binary hardcode path `/app/db`, perlu bind mount atau jalankan dari dalam container.
 
 Solusi:
 ```bash
@@ -580,29 +641,56 @@ sudo mount --bind $(pwd)/fuse_mount /app/db
 
 ## Soal 3: LibraryIT
 
-### Deskripsi Soal 3
+### Penjelasan Soal
 
-Membangun infrastruktur perpustakaan digital IT Library Nusantara menggunakan Docker dan Samba.
+Membangun infrastruktur perpustakaan digital IT Library Nusantara menggunakan Docker dan Samba. Seluruh konfigurasi berjalan otomatis tanpa setup manual setelah `docker-compose up`.
 
-**Poin A** — Container `libraryit-server` dengan Samba. Otomatis membuat:
-- 4 folder koleksi: `ebooks`, `papers`, `sourcecode`, `docs` di `/libraryit/`
-- 3 user: `member` (pw: member123), `contributor` (pw: contrib456), `librarian` (pw: lib789)
-- 2 group: `readonly` (berisi member), `staff` (berisi contributor + librarian)
-
-**Poin B** — Aturan akses per koleksi:
-- `ebooks` & `papers`: staff = RW, readonly = R only
-- `sourcecode`: **staff = RW, readonly = tidak bisa akses dan tidak kelihatan di list**
-- `docs`: semua bisa baca, **hanya librarian yang bisa tulis**
-
-**Poin C** — Semua koleksi persistent (bind mount ke host). `sourcecode` permission 750 di host. `docs` read-only dari host.
-
-**Poin D** — Log aktivitas format `[YYYY-MM-DD HH:MM:SS] [LEVEL] [USERNAME] [AKSI] [NAMA FILE/SHARE]`. Service terpisah `libraryit-logger` memonitor log real-time via `docker logs`.
+- **Poin A** — Container `libraryit-server` dengan 3 user, 2 group, 4 folder koleksi
+- **Poin B** — Aturan akses berbasis group per koleksi
+- **Poin C** — Data persistent (bind mount), `sourcecode` permission 750, `docs` read-only dari host
+- **Poin D** — Logging ke `libraryit.log`, service `libraryit-logger` monitor real-time
 
 ---
 
-### Penjelasan Kode Soal 3
+### Poin A — User, Group, dan Folder
 
-#### `smb.conf` — Konfigurasi Samba
+`entrypoint.sh` menjalankan semua setup otomatis saat container start:
+
+```bash
+#!/bin/bash
+set -e
+
+# Buat group
+groupadd -g 50 staff    2>/dev/null || true
+groupadd -g 51 readonly 2>/dev/null || true
+
+# Buat user sistem
+useradd -M -s /sbin/nologin -u 1000 -g readonly member      2>/dev/null || true
+useradd -M -s /sbin/nologin -u 1001 -g staff    contributor 2>/dev/null || true
+useradd -M -s /sbin/nologin -u 1002 -g staff    librarian   2>/dev/null || true
+
+# Daftarkan user ke Samba dengan password
+(echo "member123";  echo "member123")  | smbpasswd -a -s member
+(echo "contrib456"; echo "contrib456") | smbpasswd -a -s contributor
+(echo "lib789";     echo "lib789")     | smbpasswd -a -s librarian
+
+smbpasswd -e member && smbpasswd -e contributor && smbpasswd -e librarian
+
+# Setup folder dan permission
+mkdir -p /libraryit/{ebooks,papers,sourcecode,docs,logs}
+chown root:staff /libraryit/ebooks     && chmod 775 /libraryit/ebooks
+chown root:staff /libraryit/papers     && chmod 775 /libraryit/papers
+chown root:staff /libraryit/sourcecode && chmod 750 /libraryit/sourcecode
+chown root:staff /libraryit/docs       && chmod 775 /libraryit/docs
+
+touch /libraryit/logs/libraryit.log
+
+exec smbd --foreground --no-process-group --configfile=/etc/samba/smb.conf
+```
+
+---
+
+### Poin B — Konfigurasi Akses Samba (`smb.conf`)
 
 ```ini
 [global]
@@ -620,66 +708,53 @@ Membangun infrastruktur perpustakaan digital IT Library Nusantara menggunakan Do
    browseable = yes
    guest ok = no
 
+[papers]
+   path = /libraryit/papers
+   valid users = @staff, @readonly
+   write list = @staff
+   browseable = yes
+   guest ok = no
+
 [sourcecode]
    path = /libraryit/sourcecode
    valid users = @staff
    write list = @staff
-   browseable = no    # ← tidak muncul di list share untuk readonly
+   browseable = no       # tidak muncul di list untuk readonly
    guest ok = no
 
 [docs]
    path = /libraryit/docs
    valid users = @staff, @readonly
    read only = yes
-   write list = librarian    # ← hanya librarian, bukan @staff
+   write list = librarian   # hanya librarian, bukan @staff
    browseable = yes
    guest ok = no
 ```
 
 Kunci poin B:
-- `browseable = no` pada `[sourcecode]` → tidak muncul di `smbclient -L` untuk readonly
-- `write list = librarian` pada `[docs]` → contributor yang bagian staff tetap tidak bisa tulis
+- `browseable = no` pada `[sourcecode]` → tidak muncul di `smbclient -L` untuk member
+- `write list = librarian` pada `[docs]` → contributor (meski di @staff) tidak bisa tulis
 
-#### `entrypoint.sh` — Auto-setup saat Container Start
+---
 
-```bash
-# Buat group dengan GID spesifik
-groupadd -g 50 staff    2>/dev/null || true
-groupadd -g 51 readonly 2>/dev/null || true
-
-# Buat user sistem
-useradd -M -s /sbin/nologin -u 1000 -g readonly member
-useradd -M -s /sbin/nologin -u 1001 -g staff    contributor
-useradd -M -s /sbin/nologin -u 1002 -g staff    librarian
-
-# Daftarkan ke Samba
-(echo "member123";  echo "member123")  | smbpasswd -a -s member
-(echo "contrib456"; echo "contrib456") | smbpasswd -a -s contributor
-(echo "lib789";     echo "lib789")     | smbpasswd -a -s librarian
-
-# Set permission folder
-chown root:staff /libraryit/sourcecode && chmod 750 /libraryit/sourcecode
-chown root:staff /libraryit/docs       && chmod 775 /libraryit/docs
-
-# Jalankan Samba
-exec smbd --foreground --no-process-group --configfile=/etc/samba/smb.conf
-```
-
-#### `docker-compose.yml` — Dua Service
+### Poin C — Persistence dan Permission Host
 
 ```yaml
+# docker-compose.yml
 services:
   libraryit-server:
     build: .
     container_name: libraryit-server
     ports:
       - "1445:445"
+      - "1139:139"
     volumes:
       - ./data/ebooks:/libraryit/ebooks
       - ./data/papers:/libraryit/papers
       - ./data/sourcecode:/libraryit/sourcecode
       - ./data/docs:/libraryit/docs
       - ./logs:/libraryit/logs
+    restart: unless-stopped
 
   libraryit-logger:
     image: ubuntu:latest
@@ -689,36 +764,64 @@ services:
     volumes:
       - ./logs:/libraryit/logs
     command: >
-      bash -c "tail -f /libraryit/logs/libraryit.log"
+      bash -c "touch /libraryit/logs/libraryit.log &&
+               tail -f /libraryit/logs/libraryit.log"
+    restart: unless-stopped
+```
+
+Permission host di-set sebelum `docker-compose up`:
+
+```bash
+chmod 750 data/sourcecode   # permission 750 sesuai soal
+chmod 555 data/docs         # read-only dari host
 ```
 
 ---
 
-### Cara Menjalankan Soal 3
+### Poin D — Logging Aktivitas
+
+Log format `[YYYY-MM-DD HH:MM:SS] [LEVEL] [USERNAME] [AKSI] [NAMA FILE/SHARE]` dihasilkan dari parsing log Samba di `entrypoint.sh`:
+
+```bash
+tail -n 0 -F /var/log/samba/samba.log | while IFS= read -r line; do
+    TS=$(date '+%Y-%m-%d %H:%M:%S')
+    if echo "$line" | grep -qiE "NT_STATUS_ACCESS_DENIED|failed"; then
+        USER=$(echo "$line" | grep -oP '(?<=account )\w+' | head -1)
+        SHARE=$(echo "$line" | grep -oP '(?<=service=)\w+' | head -1)
+        [ -z "$USER" ] && USER="unknown"
+        [ -z "$SHARE" ] && SHARE="unknown"
+        echo "[$TS] [WARNING] [$USER] [DENIED] [$SHARE]" >> "$LOGFILE"
+    elif echo "$line" | grep -qiE "opened file|writeX"; then
+        USER=$(echo "$line" | grep -oP '(?<=account )\w+' | head -1)
+        FILE=$(echo "$line" | grep -oP '(?<=file )\S+' | head -1)
+        echo "[$TS] [INFO] [$USER] [WRITE] [$FILE]" >> "$LOGFILE"
+    fi
+done &
+```
+
+---
+
+### Cara Menjalankan
 
 ```bash
 cd ~/SISOP-4-2026-IT-068/soal_3
 
-# Set permission host (poin C)
 chmod 750 data/sourcecode
 chmod 555 data/docs
 
-# Build dan jalankan
 sudo docker-compose up -d --build
-
-# Verifikasi container jalan
 sudo docker ps -a
 ```
 
 ---
 
-### Output dan Hasil Soal 3
+### Output dan Hasil
 
 **Test Poin A — Verifikasi user, group, folder:**
+
 ```bash
 sudo docker exec -it libraryit-server pdbedit -L
 ```
-Expected:
 ```
 member:1000:
 contributor:1001:
@@ -728,7 +831,6 @@ librarian:1002:
 ```bash
 sudo docker exec -it libraryit-server getent group staff readonly
 ```
-Expected:
 ```
 staff:x:50:contributor,librarian
 readonly:x:51:member
@@ -737,56 +839,55 @@ readonly:x:51:member
 ```bash
 sudo docker exec -it libraryit-server ls /libraryit/
 ```
-Expected:
 ```
 docs  ebooks  logs  papers  sourcecode
 ```
 
-**Test Poin B — Akses per role:**
+**Test Poin B:**
 
-Member list share → `sourcecode` tidak muncul:
 ```bash
+# Member list share — sourcecode tidak muncul
 smbclient -L //localhost -p 1445 -U member%member123
 ```
-Expected:
 ```
-Sharename       Type      Comment
-ebooks          Disk
-papers          Disk
-docs            Disk
-IPC$            IPC       IPC Service (LibraryIT Server)
+Sharename   Type    Comment
+ebooks      Disk
+papers      Disk
+docs        Disk
+IPC$        IPC     IPC Service (LibraryIT Server)
 ```
 
-Member akses sourcecode → denied:
 ```bash
+# Member akses sourcecode → denied
 smbclient //localhost/sourcecode -p 1445 -U member%member123
-# Output: tree connect failed: NT_STATUS_ACCESS_DENIED
-```
+# tree connect failed: NT_STATUS_ACCESS_DENIED
 
-Contributor tulis docs → denied:
-```bash
+# Contributor tulis docs → denied
 smbclient //localhost/docs -p 1445 -U contributor%contrib456 \
   -c "put /tmp/test.txt test.txt"
-# Output: NT_STATUS_ACCESS_DENIED opening remote file \test.txt
-```
+# NT_STATUS_ACCESS_DENIED opening remote file \test.txt
 
-Librarian tulis docs → berhasil:
-```bash
+# Librarian tulis docs → berhasil
 smbclient //localhost/docs -p 1445 -U librarian%lib789 \
   -c "put /tmp/test.txt test.txt"
-# Output: putting file /tmp/test.txt as \test.txt
+# putting file /tmp/test.txt as \test.txt
 ```
 
-**Test Poin C — Permission host:**
+![Output Samba — smbclient list share dan test akses per user](./assets/soal3_samba.png)
+
+> **Gambar:** `smbclient -L` sebagai member tidak menampilkan sourcecode, akses sourcecode sebagai member ditolak, dan contributor gagal menulis di docs sementara librarian berhasil.
+
+**Test Poin C:**
+
 ```bash
 ls -ld data/sourcecode
-# Output: drwxr-x--- 2 root staff 4096 ... data/sourcecode
+# drwxr-x--- 2 root staff 4096 ... data/sourcecode  (permission 750)
 
 touch ./data/docs/test_dari_host.txt
-# Output: touch: cannot touch './data/docs/test_dari_host.txt': Permission denied
+# touch: cannot touch './data/docs/test_dari_host.txt': Permission denied
 ```
 
-**Test Poin D — Log real-time (2 terminal):**
+**Test Poin D — Log real-time (2 Terminal):**
 
 Terminal 1:
 ```bash
@@ -800,30 +901,34 @@ smbclient //localhost/docs -p 1445 -U librarian%lib789 \
   -c "put /tmp/test.txt report.txt"
 ```
 
-Terminal 1 expected:
+Terminal 1 output:
 ```
 [2026-05-13 10:01:22] [WARNING] [member] [DENIED] [sourcecode]
 [2026-05-13 10:02:45] [INFO] [librarian] [WRITE] [report.txt]
 ```
 
 ```bash
-cat logs/libraryit.log  # isi sama dengan docker logs
+cat logs/libraryit.log   # isi sama dengan docker logs
 ```
+
+![Output Docker Compose — libraryit-server dan libraryit-logger berjalan, docker logs](./assets/soal3_docker.png)
+
+> **Gambar:** Dua container berjalan (`libraryit-server` dan `libraryit-logger`), log aktivitas muncul real-time di `docker logs -f libraryit-logger`, dan file `libraryit.log` dapat diakses dari host.
 
 ---
 
-### Error dan Solusi Soal 3
+### Error dan Solusi
 
-**Error 1 — `docker-compose` tidak kompatibel dengan Docker versi baru**
+**Error 1 — `docker-compose` error `Not supported URL scheme http+docker`**
 
 ```
 docker.errors.DockerException: Error while fetching server API version:
 Not supported URL scheme http+docker
 ```
 
-Penyebab: `docker-compose` versi 1.29.2 (Python) tidak kompatibel dengan Docker engine versi baru.
+Penyebab: `docker-compose` versi 1.29.2 tidak kompatibel dengan Docker engine versi baru di WSL.
 
-Solusi: Selalu pakai `sudo`:
+Solusi:
 ```bash
 sudo service docker start
 sudo docker-compose up -d --build
@@ -835,65 +940,47 @@ sudo docker-compose up -d --build
 libraryit-server   Restarting (1) 8 seconds ago
 ```
 
-Penyebab: Typo di `entrypoint.sh` atau `smb.conf` menyebabkan Samba gagal start.
+Penyebab: Typo atau error di `entrypoint.sh` atau `smb.conf`.
 
-Diagnosa dan solusi:
+Diagnosa:
 ```bash
 sudo docker logs libraryit-server
-# Baca error yang muncul
+# Baca pesan error
 
-# Kalau typo di smb.conf (misal smb.confx):
-sed -i 's/smb.confx/smb.conf/' entrypoint.sh
+# Fix typo dan rebuild
 sudo docker-compose down
 sudo docker-compose up -d --build
 ```
 
 **Error 3 — `sourcecode` masih muncul di list share untuk member**
 
-Penyebab: Parameter `browseable = no` belum ada atau salah di `smb.conf`.
+Penyebab: Parameter `browseable = no` belum ada di `smb.conf`.
 
 Solusi: Pastikan di blok `[sourcecode]`:
 ```ini
 [sourcecode]
    browseable = no
 ```
-Lalu rebuild:
-```bash
-sudo docker-compose down
-sudo docker-compose up -d --build
-```
+Rebuild container setelah edit.
 
 **Error 4 — Log tidak muncul di `docker logs libraryit-logger`**
 
-Penyebab: Log level Samba terlalu rendah (default 0) sehingga tidak mencatat aktivitas.
+Penyebab: Log level Samba terlalu rendah (default 0).
 
-Solusi: Tambahkan di `smb.conf` bagian `[global]`:
+Solusi: Tambahkan di `[global]` pada `smb.conf`:
 ```ini
 log level = 3
 ```
-Rebuild container.
 
-**Error 5 — `Permission Denied` saat `touch data/sourcecode`**
-
-Penyebab: Permission 750 di host dikontrol oleh root (Docker), bukan user lokal.
-
-Ini adalah behavior yang benar sesuai poin C soal. Untuk keperluan Git, gunakan `.gitkeep`:
-```bash
-sudo touch data/sourcecode/.gitkeep
-git add data/sourcecode/.gitkeep
-```
-
-**Error 6 — Contributor bisa tulis docs (seharusnya tidak bisa)**
+**Error 5 — Contributor bisa tulis docs**
 
 Penyebab: `write list = @staff` dipakai alih-alih `write list = librarian`.
 
-Solusi: Di `smb.conf` blok `[docs]`:
+Solusi:
 ```ini
 [docs]
    read only = yes
    write list = librarian   # hanya librarian, bukan @staff
 ```
 
----
-
-*Laporan ini mencakup implementasi FUSE (Filesystem in Userspace), enkripsi XOR, Docker containerization, bind mount, dan Samba file sharing dalam bahasa C dan Linux Ubuntu (WSL) untuk Praktikum Sistem Operasi Modul 4.*
+*Laporan ini mencakup implementasi FUSE (Filesystem in Userspace), enkripsi XOR on-the-fly, Docker containerization dengan bind mount, dan Samba file sharing berbasis group dalam bahasa C dan Linux Ubuntu (WSL) untuk Praktikum Sistem Operasi Modul 4.*

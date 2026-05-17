@@ -1003,13 +1003,14 @@ Kamu tinggal klik tombol **Copy**, lalu *paste* ke file laporanmu. Laporan ini d
 
 ---
 
-# Laporan Revisi Soal 2 - Poke MOO
+# Revisi
+## Soal 2 - Poke MOO
 Untuk revisi nomer 2 itu tidak bisa di run alasannya setelah saya cari hanya karena file `server` tidak sengaja terhapus pas di git ke github jadi tinggal saya copy lagi file servernya, ini untuk hasil run
 
 ![all run soal 2](./asets/SOAL2.png)
 
 
-# Laporan Revisi Soal 3 - LibraryIT
+## Soal 3 - LibraryIT
 
 ## 1. Poin Revisi & Dampaknya
 Berdasarkan evaluasi, terdapat tiga penyesuaian utama yang dilakukan agar sistem 100% mematuhi dokumen spesifikasi (revisi):

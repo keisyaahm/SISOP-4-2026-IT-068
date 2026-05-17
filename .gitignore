@@ -1,12 +1,20 @@
-# Ignore binaries (file hasil compile)
+# Ignore Binaries
 soal_1/kenz_rescue
 soal_2/client
+soal_2/fuse
 soal_2/fuse_app
-soal_2/server
 
-# Ignore mount points (folder virtual)
-soal_1/mnt/
-soal_2/fuse_mount/
+# Ignore Data & Mounts Soal 1
+soal_1/amba_files/
 
-# JANGAN abaikan .gitkeep agar folder kosong tetap masuk GitHub
-!.gitkeep
+# Ignore isi folder Soal 2 (kecuali .gitkeep)
+soal_2/encrypted_storage/*
+!soal_2/encrypted_storage/.gitkeep
+soal_2/fuse_mount/*
+!soal_2/fuse_mount/.gitkeep
+
+# Ignore Log & Dummy Soal 3
+soal_3/logs/samba_raw.log
+soal_3/logs/cores/
+soal_3/data/docs/laporan.txt
+soal_3/data/docs/report.txt

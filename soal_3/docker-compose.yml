@@ -10,7 +10,7 @@ services:
       - ./data/papers:/libraryit/papers
       - ./data/sourcecode:/libraryit/sourcecode
       - ./data/docs:/libraryit/docs
-      - ./logs:/libraryit/logs
+      - ./logs:/logs
     restart: unless-stopped
 
   libraryit-logger:
@@ -19,10 +19,7 @@ services:
     depends_on:
       - libraryit-server
     volumes:
-      - ./logs:/libraryit/logs
-    command: >
-      bash -c "
-        echo 'LibraryIT Logger started. Monitoring log...';
-        tail -F /libraryit/logs/libraryit.log
-      "
+      - ./logs:/logs
+      - ./logger.sh:/usr/local/bin/logger.sh
+    command: bash /usr/local/bin/logger.sh
     restart: unless-stopped

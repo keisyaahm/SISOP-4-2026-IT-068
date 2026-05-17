@@ -1,0 +1,373 @@
+[2026/05/17 09:17:53.151935,  0] source3/smbd/server.c:2119(main)
+  smbd version 4.23.6-Ubuntu-4.23.6+dfsg-1ubuntu2 started.
+  Copyright Andrew Tridgell and the Samba Team 1992-2025
+[2026/05/17 09:17:53.151983,  2] source3/smbd/server.c:2123(main)
+  uid=0 gid=0 euid=0 egid=0
+[2026/05/17 09:17:53.154491,  2] source3/lib/dmallocmsg.c:78(register_dmalloc_msgs)
+  Registered MSG_REQ_DMALLOC_MARK and LOG_CHANGED
+[2026/05/17 09:17:53.154576,  3] source3/param/loadparm.c:4033(lp_load_ex)
+  lp_load_ex: refreshing parameters
+[2026/05/17 09:17:53.154643,  3] source3/param/loadparm.c:563(loadparm_s3_init_globals)
+  Initialising global parameters
+[2026/05/17 09:17:53.154674,  2] source3/param/loadparm.c:331(max_open_files)
+  rlimit_max: increasing rlimit_max (1024) to minimum Windows limit (16384)
+[2026/05/17 09:17:53.154753,  3] source3/param/loadparm.c:2935(lp_do_section)
+  Processing section "[global]"
+[2026/05/17 09:17:53.155017,  3] source3/param/loadparm.c:1737(lp_add_ipc)
+  adding IPC service
+  added interface eth0 ip=172.18.0.2 bcast=172.18.255.255 netmask=255.255.0.0
+[2026/05/17 09:17:53.155549,  3] source3/smbd/server.c:2192(main)
+  loaded services
+[2026/05/17 09:17:53.163171,  1] source3/profile/profile.c:53(set_profile_level)
+  INFO: Profiling turned OFF from pid 1
+[2026/05/17 09:17:53.163224,  3] source3/smbd/server.c:2211(main)
+  Standard input is not a socket, assuming -D option
+[2026/05/17 09:17:53.163243,  3] source3/smbd/server.c:2224(main)
+  Becoming a daemon.
+[2026/05/17 09:17:53.176786,  3] source3/lib/util_procid.c:53(pid_to_procid)
+  pid_to_procid: messaging_dgm_get_unique failed: No such file or directory
+[2026/05/17 09:17:53.180987,  2] lib/tdb_wrap/tdb_wrap.c:65(tdb_wrap_log)
+  tdb(/var/lib/samba/registry.tdb): tdb_open_ex: could not open file /var/lib/samba/registry.tdb: No such file or directory
+[2026/05/17 09:17:53.181027,  3] lib/dbwrap/dbwrap_tdb.c:484(db_open_tdb)
+  Could not open tdb: No such file or directory
+[2026/05/17 09:17:53.208761,  3] source3/auth/token_util.c:707(finalize_local_nt_token)
+  Failed to fetch domain sid for WORKGROUP
+[2026/05/17 09:17:53.215150,  2] source3/smbd/server.c:1553(smbd_parent_loop)
+  waiting for connections
+[2026/05/17 09:18:21.359245,  3] lib/util/access.c:372(allow_access)
+  Allowed connection from 172.18.0.1 (172.18.0.1)
+[2026/05/17 09:18:21.359721,  3] source3/smbd/smb2_oplock.c:1491(init_oplocks)
+  init_oplocks: initializing messages.
+[2026/05/17 09:18:21.360185,  3] source3/smbd/smb2_negprot.c:368(smbd_smb2_request_process_negprot)
+  Selected protocol SMB3_11
+[2026/05/17 09:18:21.364384,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'gssapi_spnego' registered
+[2026/05/17 09:18:21.364539,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'gssapi_krb5' registered
+[2026/05/17 09:18:21.364623,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'gssapi_krb5_sasl' registered
+[2026/05/17 09:18:21.364708,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'spnego' registered
+[2026/05/17 09:18:21.364744,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'schannel' registered
+[2026/05/17 09:18:21.364767,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'ncalrpc_as_system' registered
+[2026/05/17 09:18:21.364786,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'sasl-EXTERNAL' registered
+[2026/05/17 09:18:21.364836,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'ntlmssp' registered
+[2026/05/17 09:18:21.364870,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'ntlmssp_resume_ccache' registered
+[2026/05/17 09:18:21.364922,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'http_basic' registered
+[2026/05/17 09:18:21.364956,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'http_ntlm' registered
+[2026/05/17 09:18:21.365007,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'http_negotiate' registered
+[2026/05/17 09:18:21.365078,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'krb5' registered
+[2026/05/17 09:18:21.365188,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'fake_gssapi_krb5' registered
+[2026/05/17 09:18:21.369386,  3] auth/ntlmssp/ntlmssp_util.c:78(debug_ntlmssp_flags)
+  Got NTLMSSP neg_flags=0x62088215
+[2026/05/17 09:18:21.370566,  3] auth/ntlmssp/ntlmssp_server.c:506(ntlmssp_server_preauth)
+  Got user=[member] domain=[WORKGROUP] workstation=[LAPTOP-54TFG1K9] len1=24 len2=260
+[2026/05/17 09:18:21.370709,  3] source3/auth/auth.c:202(auth_check_ntlm_password)
+  auth_check_ntlm_password: check_ntlm_password:  Checking password for unmapped user [WORKGROUP]\[member]@[LAPTOP-54TFG1K9] with the new password interface
+[2026/05/17 09:18:21.371033,  3] source3/auth/auth.c:208(auth_check_ntlm_password)
+  auth_check_ntlm_password: check_ntlm_password:  mapped user is: [WORKGROUP]\[member]@[LAPTOP-54TFG1K9]
+[2026/05/17 09:18:21.371509,  3] source3/passdb/lookup_sid.c:1827(get_primary_group_sid)
+  Forcing Primary Group to 'Domain Users' for member
+[2026/05/17 09:18:21.372062,  3] source3/passdb/lookup_sid.c:1827(get_primary_group_sid)
+  Forcing Primary Group to 'Domain Users' for member
+[2026/05/17 09:18:21.373087,  3] source3/auth/auth.c:274(auth_check_ntlm_password)
+  auth_check_ntlm_password: sam_ignoredomain authentication for user [member] succeeded
+[2026/05/17 09:18:21.373250,  3] auth/auth_log.c:860(log_authentication_event_human_readable)
+  Auth: [SMB2,(null)] user [WORKGROUP]\[member] at [Sun, 17 May 2026 09:18:21.373215 UTC] with [NTLMv2] status [NT_STATUS_OK] workstation [LAPTOP-54TFG1K9] remote host [ipv4:172.18.0.1:55138] became [E60276C9B138]\[member] [S-1-5-21-287473008-2808210191-3202908113-1000]. local host [ipv4:172.18.0.2:445] 
+  {"timestamp": "2026-05-17T09:18:21.373456+0000", "type": "Authentication", "Authentication": {"version": {"major": 1, "minor": 3}, "eventId": 4624, "logonId": "0", "logonType": 3, "status": "NT_STATUS_OK", "localAddress": "ipv4:172.18.0.2:445", "remoteAddress": "ipv4:172.18.0.1:55138", "serviceDescription": "SMB2", "authDescription": null, "clientDomain": "WORKGROUP", "clientAccount": "member", "workstation": "LAPTOP-54TFG1K9", "becameAccount": "member", "becameDomain": "E60276C9B138", "becameSid": "S-1-5-21-287473008-2808210191-3202908113-1000", "mappedAccount": "member", "mappedDomain": "WORKGROUP", "netlogonComputer": null, "netlogonTrustAccount": null, "netlogonNegotiateFlags": "0x00000000", "netlogonSecureChannelType": 0, "netlogonTrustAccountSid": null, "passwordType": "NTLMv2", "clientPolicyAccessCheck": null, "serverPolicyAccessCheck": null, "duration": 4364}}
+[2026/05/17 09:18:21.373700,  2] source3/auth/auth.c:332(auth_check_ntlm_password)
+  check_ntlm_password:  authentication for user [member] -> [member] -> [member] succeeded
+[2026/05/17 09:18:21.373735,  3] source3/param/loadparm.c:4033(lp_load_ex)
+  lp_load_ex: refreshing parameters
+[2026/05/17 09:18:21.373800,  3] source3/param/loadparm.c:563(loadparm_s3_init_globals)
+  Initialising global parameters
+[2026/05/17 09:18:21.373936,  3] source3/param/loadparm.c:2935(lp_do_section)
+  Processing section "[global]"
+[2026/05/17 09:18:21.375242,  3] source3/param/loadparm.c:1737(lp_add_ipc)
+  adding IPC service
+[2026/05/17 09:18:21.375398,  3] auth/ntlmssp/ntlmssp_sign.c:623(ntlmssp_sign_reset)
+  NTLMSSP Sign/Seal - Initialising with flags:
+[2026/05/17 09:18:21.375521,  3] auth/ntlmssp/ntlmssp_util.c:78(debug_ntlmssp_flags)
+  Got NTLMSSP neg_flags=0x62088215
+[2026/05/17 09:18:21.375580,  3] auth/ntlmssp/ntlmssp_sign.c:623(ntlmssp_sign_reset)
+  NTLMSSP Sign/Seal - Initialising with flags:
+[2026/05/17 09:18:21.375629,  3] auth/ntlmssp/ntlmssp_util.c:78(debug_ntlmssp_flags)
+  Got NTLMSSP neg_flags=0x62088215
+[2026/05/17 09:18:21.376120,  3] source3/auth/token_util.c:707(finalize_local_nt_token)
+  Failed to fetch domain sid for WORKGROUP
+[2026/05/17 09:18:21.377115,  3] source3/smbd/password.c:85(register_homes_share)
+  Adding homes service for user 'member' using home directory: '/home/member'
+[2026/05/17 09:18:21.378747,  3] lib/util/access.c:372(allow_access)
+  Allowed connection from 172.18.0.1 (172.18.0.1)
+[2026/05/17 09:18:21.378928,  3] source3/smbd/smb2_service.c:585(make_connection_snum)
+  make_connection_snum: Connect path is '/tmp' for service [IPC$]
+[2026/05/17 09:18:21.379028,  3] source3/smbd/vfs.c:115(vfs_init_default)
+  Initialising default vfs hooks
+[2026/05/17 09:18:21.379102,  3] source3/smbd/vfs.c:141(vfs_init_custom)
+  Initialising custom vfs hooks from [/[Default VFS]/]
+[2026/05/17 09:18:21.380237,  3] source3/smbd/msdfs.c:985(get_referred_path)
+  get_referred_path: |sourcecode| in dfs path \localhost\sourcecode is not a dfs root.
+[2026/05/17 09:18:21.380377,  3] source3/smbd/smb2_server.c:4151(smbd_smb2_request_error_ex)
+  smbd_smb2_request_error_ex: idx[1] status[NT_STATUS_NOT_FOUND] || at source3/smbd/smb2_ioctl.c:355
+[2026/05/17 09:18:21.381916,  3] lib/util/access.c:372(allow_access)
+  Allowed connection from 172.18.0.1 (172.18.0.1)
+[2026/05/17 09:18:21.382031,  3] libcli/security/dom_sid.c:268(dom_sid_parse_endp)
+  string_to_sid: SID @staff is not in a valid format
+[2026/05/17 09:18:21.382744,  1] source3/smbd/smb2_service.c:337(create_connection_session_info)
+  create_connection_session_info: user 'member' (from session setup) not permitted to access this share (sourcecode)
+[2026/05/17 09:18:21.382807,  1] source3/smbd/smb2_service.c:520(make_connection_snum)
+  make_connection_snum: create_connection_session_info failed: NT_STATUS_ACCESS_DENIED
+[2026/05/17 09:18:21.382847,  3] source3/smbd/smb2_server.c:4151(smbd_smb2_request_error_ex)
+  smbd_smb2_request_error_ex: idx[1] status[NT_STATUS_ACCESS_DENIED] || at source3/smbd/smb2_tcon.c:152
+[2026/05/17 09:18:21.383598,  3] source3/smbd/smb2_server.c:4151(smbd_smb2_request_error_ex)
+  smbd_smb2_request_error_ex: idx[1] status[NT_STATUS_NETWORK_NAME_DELETED] || at source3/smbd/smb2_server.c:3379
+[2026/05/17 09:18:21.385315,  3] source3/smbd/server_exit.c:230(exit_server_common)
+  Server exit (NT_STATUS_CONNECTION_RESET)
+[2026/05/17 09:18:48.259941,  3] lib/util/access.c:372(allow_access)
+  Allowed connection from 172.18.0.1 (172.18.0.1)
+[2026/05/17 09:18:48.260273,  3] source3/smbd/smb2_oplock.c:1491(init_oplocks)
+  init_oplocks: initializing messages.
+[2026/05/17 09:18:48.260848,  3] source3/smbd/smb2_negprot.c:368(smbd_smb2_request_process_negprot)
+  Selected protocol SMB3_11
+[2026/05/17 09:18:48.263840,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'gssapi_spnego' registered
+[2026/05/17 09:18:48.263922,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'gssapi_krb5' registered
+[2026/05/17 09:18:48.263958,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'gssapi_krb5_sasl' registered
+[2026/05/17 09:18:48.263980,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'spnego' registered
+[2026/05/17 09:18:48.263999,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'schannel' registered
+[2026/05/17 09:18:48.264080,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'ncalrpc_as_system' registered
+[2026/05/17 09:18:48.264124,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'sasl-EXTERNAL' registered
+[2026/05/17 09:18:48.264196,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'ntlmssp' registered
+[2026/05/17 09:18:48.264231,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'ntlmssp_resume_ccache' registered
+[2026/05/17 09:18:48.264251,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'http_basic' registered
+[2026/05/17 09:18:48.264270,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'http_ntlm' registered
+[2026/05/17 09:18:48.264288,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'http_negotiate' registered
+[2026/05/17 09:18:48.264306,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'krb5' registered
+[2026/05/17 09:18:48.264325,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'fake_gssapi_krb5' registered
+[2026/05/17 09:18:48.269021,  3] auth/ntlmssp/ntlmssp_util.c:78(debug_ntlmssp_flags)
+  Got NTLMSSP neg_flags=0x62088215
+[2026/05/17 09:18:48.270017,  3] auth/ntlmssp/ntlmssp_server.c:506(ntlmssp_server_preauth)
+  Got user=[contributor] domain=[WORKGROUP] workstation=[LAPTOP-54TFG1K9] len1=24 len2=260
+[2026/05/17 09:18:48.270125,  3] source3/auth/auth.c:202(auth_check_ntlm_password)
+  auth_check_ntlm_password: check_ntlm_password:  Checking password for unmapped user [WORKGROUP]\[contributor]@[LAPTOP-54TFG1K9] with the new password interface
+[2026/05/17 09:18:48.270166,  3] source3/auth/auth.c:208(auth_check_ntlm_password)
+  auth_check_ntlm_password: check_ntlm_password:  mapped user is: [WORKGROUP]\[contributor]@[LAPTOP-54TFG1K9]
+[2026/05/17 09:18:48.270658,  3] source3/passdb/lookup_sid.c:1827(get_primary_group_sid)
+  Forcing Primary Group to 'Domain Users' for contributor
+[2026/05/17 09:18:48.271342,  3] source3/passdb/lookup_sid.c:1827(get_primary_group_sid)
+  Forcing Primary Group to 'Domain Users' for contributor
+[2026/05/17 09:18:48.271871,  3] source3/auth/auth.c:274(auth_check_ntlm_password)
+  auth_check_ntlm_password: sam_ignoredomain authentication for user [contributor] succeeded
+[2026/05/17 09:18:48.272065,  3] auth/auth_log.c:860(log_authentication_event_human_readable)
+  Auth: [SMB2,(null)] user [WORKGROUP]\[contributor] at [Sun, 17 May 2026 09:18:48.272028 UTC] with [NTLMv2] status [NT_STATUS_OK] workstation [LAPTOP-54TFG1K9] remote host [ipv4:172.18.0.1:58230] became [E60276C9B138]\[contributor] [S-1-5-21-287473008-2808210191-3202908113-1001]. local host [ipv4:172.18.0.2:445] 
+  {"timestamp": "2026-05-17T09:18:48.272271+0000", "type": "Authentication", "Authentication": {"version": {"major": 1, "minor": 3}, "eventId": 4624, "logonId": "0", "logonType": 3, "status": "NT_STATUS_OK", "localAddress": "ipv4:172.18.0.2:445", "remoteAddress": "ipv4:172.18.0.1:58230", "serviceDescription": "SMB2", "authDescription": null, "clientDomain": "WORKGROUP", "clientAccount": "contributor", "workstation": "LAPTOP-54TFG1K9", "becameAccount": "contributor", "becameDomain": "E60276C9B138", "becameSid": "S-1-5-21-287473008-2808210191-3202908113-1001", "mappedAccount": "contributor", "mappedDomain": "WORKGROUP", "netlogonComputer": null, "netlogonTrustAccount": null, "netlogonNegotiateFlags": "0x00000000", "netlogonSecureChannelType": 0, "netlogonTrustAccountSid": null, "passwordType": "NTLMv2", "clientPolicyAccessCheck": null, "serverPolicyAccessCheck": null, "duration": 3406}}
+[2026/05/17 09:18:48.272391,  2] source3/auth/auth.c:332(auth_check_ntlm_password)
+  check_ntlm_password:  authentication for user [contributor] -> [contributor] -> [contributor] succeeded
+[2026/05/17 09:18:48.272433,  3] source3/param/loadparm.c:4033(lp_load_ex)
+  lp_load_ex: refreshing parameters
+[2026/05/17 09:18:48.272532,  3] source3/param/loadparm.c:563(loadparm_s3_init_globals)
+  Initialising global parameters
+[2026/05/17 09:18:48.272743,  3] source3/param/loadparm.c:2935(lp_do_section)
+  Processing section "[global]"
+[2026/05/17 09:18:48.273216,  3] source3/param/loadparm.c:1737(lp_add_ipc)
+  adding IPC service
+[2026/05/17 09:18:48.273389,  3] auth/ntlmssp/ntlmssp_sign.c:623(ntlmssp_sign_reset)
+  NTLMSSP Sign/Seal - Initialising with flags:
+[2026/05/17 09:18:48.273465,  3] auth/ntlmssp/ntlmssp_util.c:78(debug_ntlmssp_flags)
+  Got NTLMSSP neg_flags=0x62088215
+[2026/05/17 09:18:48.273561,  3] auth/ntlmssp/ntlmssp_sign.c:623(ntlmssp_sign_reset)
+  NTLMSSP Sign/Seal - Initialising with flags:
+[2026/05/17 09:18:48.273626,  3] auth/ntlmssp/ntlmssp_util.c:78(debug_ntlmssp_flags)
+  Got NTLMSSP neg_flags=0x62088215
+[2026/05/17 09:18:48.274106,  3] source3/auth/token_util.c:707(finalize_local_nt_token)
+  Failed to fetch domain sid for WORKGROUP
+[2026/05/17 09:18:48.275020,  3] source3/smbd/password.c:85(register_homes_share)
+  Adding homes service for user 'contributor' using home directory: '/home/contributor'
+[2026/05/17 09:18:48.276896,  3] lib/util/access.c:372(allow_access)
+  Allowed connection from 172.18.0.1 (172.18.0.1)
+[2026/05/17 09:18:48.277060,  3] source3/smbd/smb2_service.c:585(make_connection_snum)
+  make_connection_snum: Connect path is '/tmp' for service [IPC$]
+[2026/05/17 09:18:48.277125,  3] source3/smbd/vfs.c:115(vfs_init_default)
+  Initialising default vfs hooks
+[2026/05/17 09:18:48.277182,  3] source3/smbd/vfs.c:141(vfs_init_custom)
+  Initialising custom vfs hooks from [/[Default VFS]/]
+[2026/05/17 09:18:48.278312,  3] source3/smbd/msdfs.c:985(get_referred_path)
+  get_referred_path: |docs| in dfs path \localhost\docs is not a dfs root.
+[2026/05/17 09:18:48.278398,  3] source3/smbd/smb2_server.c:4151(smbd_smb2_request_error_ex)
+  smbd_smb2_request_error_ex: idx[1] status[NT_STATUS_NOT_FOUND] || at source3/smbd/smb2_ioctl.c:355
+[2026/05/17 09:18:48.279913,  3] lib/util/access.c:372(allow_access)
+  Allowed connection from 172.18.0.1 (172.18.0.1)
+[2026/05/17 09:18:48.280002,  3] libcli/security/dom_sid.c:268(dom_sid_parse_endp)
+  string_to_sid: SID @staff is not in a valid format
+[2026/05/17 09:18:48.280538,  3] source3/smbd/smb2_service.c:585(make_connection_snum)
+  make_connection_snum: Connect path is '/libraryit/docs' for service [docs]
+[2026/05/17 09:18:48.280725,  3] libcli/security/dom_sid.c:268(dom_sid_parse_endp)
+  string_to_sid: SID @staff is not in a valid format
+[2026/05/17 09:18:48.281173,  3] libcli/security/dom_sid.c:268(dom_sid_parse_endp)
+  string_to_sid: SID librarian is not in a valid format
+[2026/05/17 09:18:48.281527,  3] source3/passdb/lookup_sid.c:1827(get_primary_group_sid)
+  Forcing Primary Group to 'Domain Users' for librarian
+[2026/05/17 09:18:48.282053,  3] source3/smbd/vfs.c:115(vfs_init_default)
+  Initialising default vfs hooks
+[2026/05/17 09:18:48.282135,  3] source3/smbd/vfs.c:141(vfs_init_custom)
+  Initialising custom vfs hooks from [/[Default VFS]/]
+[2026/05/17 09:18:48.282295,  3] libcli/security/dom_sid.c:268(dom_sid_parse_endp)
+  string_to_sid: SID @staff is not in a valid format
+[2026/05/17 09:18:48.282561,  3] libcli/security/dom_sid.c:268(dom_sid_parse_endp)
+  string_to_sid: SID librarian is not in a valid format
+[2026/05/17 09:18:48.282818,  3] source3/passdb/lookup_sid.c:1827(get_primary_group_sid)
+  Forcing Primary Group to 'Domain Users' for librarian
+[2026/05/17 09:18:48.283399,  3] source3/smbd/smb2_service.c:833(make_connection_snum)
+  laptop-54tfg1k9 (ipv4:172.18.0.1:58230) signed connect to service docs initially as user contributor (uid=1001, gid=50) (pid 78)
+[2026/05/17 09:18:48.285287,  3] source3/smbd/smb2_server.c:4151(smbd_smb2_request_error_ex)
+  smbd_smb2_request_error_ex: idx[1] status[NT_STATUS_ACCESS_DENIED] || at source3/smbd/smb2_create.c:393
+[2026/05/17 09:18:48.286437,  3] source3/smbd/smb2_service.c:929(close_cnum)
+  laptop-54tfg1k9 (ipv4:172.18.0.1:58230) closed connection to service docs
+[2026/05/17 09:18:48.287996,  3] source3/smbd/server_exit.c:230(exit_server_common)
+  Server exit (NT_STATUS_CONNECTION_RESET)
+[2026/05/17 09:18:58.296060,  3] lib/util/access.c:372(allow_access)
+  Allowed connection from 172.18.0.1 (172.18.0.1)
+[2026/05/17 09:18:58.296740,  3] source3/smbd/smb2_oplock.c:1491(init_oplocks)
+  init_oplocks: initializing messages.
+[2026/05/17 09:18:58.297436,  3] source3/smbd/smb2_negprot.c:368(smbd_smb2_request_process_negprot)
+  Selected protocol SMB3_11
+[2026/05/17 09:18:58.302767,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'gssapi_spnego' registered
+[2026/05/17 09:18:58.302871,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'gssapi_krb5' registered
+[2026/05/17 09:18:58.302907,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'gssapi_krb5_sasl' registered
+[2026/05/17 09:18:58.302928,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'spnego' registered
+[2026/05/17 09:18:58.302949,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'schannel' registered
+[2026/05/17 09:18:58.302988,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'ncalrpc_as_system' registered
+[2026/05/17 09:18:58.303053,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'sasl-EXTERNAL' registered
+[2026/05/17 09:18:58.303151,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'ntlmssp' registered
+[2026/05/17 09:18:58.303184,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'ntlmssp_resume_ccache' registered
+[2026/05/17 09:18:58.303240,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'http_basic' registered
+[2026/05/17 09:18:58.303272,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'http_ntlm' registered
+[2026/05/17 09:18:58.303330,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'http_negotiate' registered
+[2026/05/17 09:18:58.303419,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'krb5' registered
+[2026/05/17 09:18:58.303505,  3] auth/gensec/gensec_start.c:1052(gensec_register)
+  GENSEC backend 'fake_gssapi_krb5' registered
+[2026/05/17 09:18:58.308402,  3] auth/ntlmssp/ntlmssp_util.c:78(debug_ntlmssp_flags)
+  Got NTLMSSP neg_flags=0x62088215
+[2026/05/17 09:18:58.309894,  3] auth/ntlmssp/ntlmssp_server.c:506(ntlmssp_server_preauth)
+  Got user=[librarian] domain=[WORKGROUP] workstation=[LAPTOP-54TFG1K9] len1=24 len2=260
+[2026/05/17 09:18:58.310134,  3] source3/auth/auth.c:202(auth_check_ntlm_password)
+  auth_check_ntlm_password: check_ntlm_password:  Checking password for unmapped user [WORKGROUP]\[librarian]@[LAPTOP-54TFG1K9] with the new password interface
+[2026/05/17 09:18:58.310200,  3] source3/auth/auth.c:208(auth_check_ntlm_password)
+  auth_check_ntlm_password: check_ntlm_password:  mapped user is: [WORKGROUP]\[librarian]@[LAPTOP-54TFG1K9]
+[2026/05/17 09:18:58.310876,  3] source3/passdb/lookup_sid.c:1827(get_primary_group_sid)
+  Forcing Primary Group to 'Domain Users' for librarian
+[2026/05/17 09:18:58.311590,  3] source3/passdb/lookup_sid.c:1827(get_primary_group_sid)
+  Forcing Primary Group to 'Domain Users' for librarian
+[2026/05/17 09:18:58.312243,  3] source3/auth/auth.c:274(auth_check_ntlm_password)
+  auth_check_ntlm_password: sam_ignoredomain authentication for user [librarian] succeeded
+[2026/05/17 09:18:58.312388,  3] auth/auth_log.c:860(log_authentication_event_human_readable)
+  Auth: [SMB2,(null)] user [WORKGROUP]\[librarian] at [Sun, 17 May 2026 09:18:58.312359 UTC] with [NTLMv2] status [NT_STATUS_OK] workstation [LAPTOP-54TFG1K9] remote host [ipv4:172.18.0.1:40830] became [E60276C9B138]\[librarian] [S-1-5-21-287473008-2808210191-3202908113-1002]. local host [ipv4:172.18.0.2:445] 
+  {"timestamp": "2026-05-17T09:18:58.312583+0000", "type": "Authentication", "Authentication": {"version": {"major": 1, "minor": 3}, "eventId": 4624, "logonId": "0", "logonType": 3, "status": "NT_STATUS_OK", "localAddress": "ipv4:172.18.0.2:445", "remoteAddress": "ipv4:172.18.0.1:40830", "serviceDescription": "SMB2", "authDescription": null, "clientDomain": "WORKGROUP", "clientAccount": "librarian", "workstation": "LAPTOP-54TFG1K9", "becameAccount": "librarian", "becameDomain": "E60276C9B138", "becameSid": "S-1-5-21-287473008-2808210191-3202908113-1002", "mappedAccount": "librarian", "mappedDomain": "WORKGROUP", "netlogonComputer": null, "netlogonTrustAccount": null, "netlogonNegotiateFlags": "0x00000000", "netlogonSecureChannelType": 0, "netlogonTrustAccountSid": null, "passwordType": "NTLMv2", "clientPolicyAccessCheck": null, "serverPolicyAccessCheck": null, "duration": 4364}}
+[2026/05/17 09:18:58.312719,  2] source3/auth/auth.c:332(auth_check_ntlm_password)
+  check_ntlm_password:  authentication for user [librarian] -> [librarian] -> [librarian] succeeded
+[2026/05/17 09:18:58.312756,  3] source3/param/loadparm.c:4033(lp_load_ex)
+  lp_load_ex: refreshing parameters
+[2026/05/17 09:18:58.312917,  3] source3/param/loadparm.c:563(loadparm_s3_init_globals)
+  Initialising global parameters
+[2026/05/17 09:18:58.313095,  3] source3/param/loadparm.c:2935(lp_do_section)
+  Processing section "[global]"
+[2026/05/17 09:18:58.313522,  3] source3/param/loadparm.c:1737(lp_add_ipc)
+  adding IPC service
+[2026/05/17 09:18:58.313730,  3] auth/ntlmssp/ntlmssp_sign.c:623(ntlmssp_sign_reset)
+  NTLMSSP Sign/Seal - Initialising with flags:
+[2026/05/17 09:18:58.313845,  3] auth/ntlmssp/ntlmssp_util.c:78(debug_ntlmssp_flags)
+  Got NTLMSSP neg_flags=0x62088215
+[2026/05/17 09:18:58.313898,  3] auth/ntlmssp/ntlmssp_sign.c:623(ntlmssp_sign_reset)
+  NTLMSSP Sign/Seal - Initialising with flags:
+[2026/05/17 09:18:58.313948,  3] auth/ntlmssp/ntlmssp_util.c:78(debug_ntlmssp_flags)
+  Got NTLMSSP neg_flags=0x62088215
+[2026/05/17 09:18:58.314556,  3] source3/auth/token_util.c:707(finalize_local_nt_token)
+  Failed to fetch domain sid for WORKGROUP
+[2026/05/17 09:18:58.315396,  3] source3/smbd/password.c:85(register_homes_share)
+  Adding homes service for user 'librarian' using home directory: '/home/librarian'
+[2026/05/17 09:18:58.317222,  3] lib/util/access.c:372(allow_access)
+  Allowed connection from 172.18.0.1 (172.18.0.1)
+[2026/05/17 09:18:58.317619,  3] source3/smbd/smb2_service.c:585(make_connection_snum)
+  make_connection_snum: Connect path is '/tmp' for service [IPC$]
+[2026/05/17 09:18:58.317745,  3] source3/smbd/vfs.c:115(vfs_init_default)
+  Initialising default vfs hooks
+[2026/05/17 09:18:58.317778,  3] source3/smbd/vfs.c:141(vfs_init_custom)
+  Initialising custom vfs hooks from [/[Default VFS]/]
+[2026/05/17 09:18:58.318791,  3] source3/smbd/msdfs.c:985(get_referred_path)
+  get_referred_path: |docs| in dfs path \localhost\docs is not a dfs root.
+[2026/05/17 09:18:58.318930,  3] source3/smbd/smb2_server.c:4151(smbd_smb2_request_error_ex)
+  smbd_smb2_request_error_ex: idx[1] status[NT_STATUS_NOT_FOUND] || at source3/smbd/smb2_ioctl.c:355
+[2026/05/17 09:18:58.320764,  3] lib/util/access.c:372(allow_access)
+  Allowed connection from 172.18.0.1 (172.18.0.1)
+[2026/05/17 09:18:58.320851,  3] libcli/security/dom_sid.c:268(dom_sid_parse_endp)
+  string_to_sid: SID @staff is not in a valid format
+[2026/05/17 09:18:58.321505,  3] source3/smbd/smb2_service.c:585(make_connection_snum)
+  make_connection_snum: Connect path is '/libraryit/docs' for service [docs]
+[2026/05/17 09:18:58.321573,  3] libcli/security/dom_sid.c:268(dom_sid_parse_endp)
+  string_to_sid: SID @staff is not in a valid format
+[2026/05/17 09:18:58.321698,  3] libcli/security/dom_sid.c:268(dom_sid_parse_endp)
+  string_to_sid: SID librarian is not in a valid format
+[2026/05/17 09:18:58.321890,  3] source3/passdb/lookup_sid.c:1827(get_primary_group_sid)
+  Forcing Primary Group to 'Domain Users' for librarian
+[2026/05/17 09:18:58.322061,  3] source3/smbd/vfs.c:115(vfs_init_default)
+  Initialising default vfs hooks
+[2026/05/17 09:18:58.322129,  3] source3/smbd/vfs.c:141(vfs_init_custom)
+  Initialising custom vfs hooks from [/[Default VFS]/]
+[2026/05/17 09:18:58.322347,  3] libcli/security/dom_sid.c:268(dom_sid_parse_endp)
+  string_to_sid: SID @staff is not in a valid format
+[2026/05/17 09:18:58.322544,  3] libcli/security/dom_sid.c:268(dom_sid_parse_endp)
+  string_to_sid: SID librarian is not in a valid format
+[2026/05/17 09:18:58.322785,  3] source3/passdb/lookup_sid.c:1827(get_primary_group_sid)
+  Forcing Primary Group to 'Domain Users' for librarian
+[2026/05/17 09:18:58.323302,  3] source3/smbd/smb2_service.c:833(make_connection_snum)
+  laptop-54tfg1k9 (ipv4:172.18.0.1:40830) signed connect to service docs initially as user librarian (uid=1002, gid=50) (pid 79)
+[2026/05/17 09:18:58.326557,  2] source3/smbd/open.c:1291(open_file)
+  librarian opened file laporan.txt read=Yes write=Yes (numopen=2)
+[2026/05/17 09:18:58.328516,  3] source3/lib/util.c:848(fcntl_getlock)
+  fcntl_getlock: fd 28 is returned info 2 pid 0
+[2026/05/17 09:18:58.329051,  3] source3/smbd/smb2_write.c:214(smb2_write_complete_internal)
+  smb2: fnum 100642821, file laporan.txt, length=24 offset=0 wrote=24
+[2026/05/17 09:18:58.330192,  2] source3/smbd/close.c:963(close_normal_file)
+  librarian closed file laporan.txt (numopen=0) NT_STATUS_OK
+[2026/05/17 09:18:58.331167,  3] source3/smbd/smb2_service.c:929(close_cnum)
+  laptop-54tfg1k9 (ipv4:172.18.0.1:40830) closed connection to service docs
+[2026/05/17 09:18:58.333087,  3] source3/smbd/server_exit.c:230(exit_server_common)
+  Server exit (NT_STATUS_CONNECTION_RESET)
+[2026/05/17 09:23:11.024000,  3] source3/smbd/server_exit.c:230(exit_server_common)
+  Server exit (termination signal)

@@ -48,38 +48,12 @@ chmod 750 /libraryit/sourcecode
 chown librarian:staff /libraryit/docs
 chmod 775 /libraryit/docs
 
-#5. Pastikan log dir ada
-mkdir -p /var/log/samba
-mkdir -p /libraryit/logs
-touch /libraryit/logs/libraryit.log
-chmod 666 /libraryit/logs/libraryit.log
+#5. Pastikan log dir ada sesuai revisi
+mkdir -p /logs
+touch /logs/samba_raw.log
+touch /logs/libraryit.log
+chmod 666 /logs/samba_raw.log /logs/libraryit.log
 
-#6. Setup log watcher — tulis ke libraryit.log
-# Jalankan Samba audit logger di background
-(
-  tail -F /var/log/samba/samba.log 2>/dev/null | while read -r line; do
-    TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-
-    # Tangkap Koneksi Sukses
-    if echo "$line" | grep -q "connect to service"; then
-      USER=$(echo "$line" | grep -oP '(?<=as user )\S+' | head -1)
-      SHARE=$(echo "$line" | grep -oP '(?<=connect to service )\S+' | head -1)
-      [ -n "$USER" ] && [ -n "$SHARE" ] && echo "[$TIMESTAMP] [INFO] [$USER] [CONNECT] [$SHARE]" >> /libraryit/logs/libraryit.log
-    fi
-
-    # Tangkap Ditolak Akses Folder
-    if echo "$line" | grep -q "not permitted to access this share"; then
-      USER=$(echo "$line" | grep -oP "(?<=user ')[^']+")
-      SHARE=$(echo "$line" | grep -oP "(?<=share \()[^\)]+")
-      [ -n "$USER" ] && [ -n "$SHARE" ] && echo "[$TIMESTAMP] [WARNING] [$USER] [DENIED] [$SHARE]" >> /libraryit/logs/libraryit.log
-    fi
-
-    # Tangkap Ditolak Tulis File
-    if echo "$line" | grep -q "NT_STATUS_ACCESS_DENIED"; then
-      echo "[$TIMESTAMP] [WARNING] [contributor] [DENIED] [docs/file]" >> /libraryit/logs/libraryit.log
-    fi
-  done
-) &
-
-#7. Jalankan Samba (foreground)
+#6. Jalankan Samba (foreground)
 exec smbd --foreground --no-process-group --configfile=/etc/samba/smb.conf
+

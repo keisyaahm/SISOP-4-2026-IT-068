@@ -1,1249 +1,1060 @@
-# Laporan Praktikum Sistem Operasi 2026 - Modul 4
-## FUSE, Docker, dan Samba
+# Laporan Praktikum Sistem Operasi 2026 - Modul 5
+## OS Building dan Bootloaders
 
-**Nama:** Keisya Halimah Mulia  
-**NRP:** 5027251068  
-**Kelas:** A / Teknologi Informasi 
+**Nama:** Keisya Halimah Mulia
+**NRP:** 5027251068
+**Kelas:** A / Teknologi Informasi
 
 ---
 
 ## Daftar Isi
 
-- [Persiapan Direktori dan Repository](#persiapan-direktori-dan-repository)
-- [Soal 1: Save Asisten Kenz](#soal-1-save-asisten-kenz)
-  - [Penjelasan Soal](#penjelasan-soal)
-  - [Poin A Download dan Setup](#poin-a-download-dan-setup)
-  - [Poin B Passthrough (getattr, readdir, open, read)](#poin-b-passthrough-getattr-readdir-open-read)
-  - [Poin C Virtual File `tujuan.txt`](#poin-c-virtual-file-tujuantxt)
-  - [Poin D On-the-fly Content `tujuan.txt`](#poin-d-on-the-fly-content-tujuantxt)
-  - [Cara Kompilasi dan Menjalankan](#cara-kompilasi-dan-menjalankan)
-  - [Output dan Hasil](#output-dan-hasil)
-  - [Error dan Solusi](#error-dan-solusi)
-- [Soal 2: Poke MOO](#soal-2-poke-moo)
-  - [Penjelasan Soal](#penjelasan-soal-1)
-  - [Poin A & B FUSE Penuh dengan Enkripsi](#poin-a--b-fuse-penuh-dengan-enkripsi)
-  - [Poin C Enkripsi/Dekripsi XOR On-the-fly](#poin-c-enkripsidekripsi-xor-on-the-fly)
-  - [Containerization Dockerfile](#containerization-dockerfile)
-  - [Integration `client.c`](#integration-clientc)
-  - [Cara Kompilasi dan Menjalankan](#cara-kompilasi-dan-menjalankan-1)
-  - [Output dan Hasil](#output-dan-hasil-1)
-  - [Error dan Solusi](#error-dan-solusi-1)
-- [Soal 3: LibraryIT](#soal-3-libraryit)
-  - [Penjelasan Soal](#penjelasan-soal-2)
-  - [Poin A User, Group, dan Folder](#poin-a-user-group-dan-folder)
-  - [Poin B Konfigurasi Akses Samba (`smb.conf`)](#poin-b-konfigurasi-akses-samba-smbconf)
-  - [Poin C Persistence dan Permission Host](#poin-c-persistence-dan-permission-host)
-  - [Poin D — Logging Aktivitas](#poin-d---logging-aktivitas)
-  - [Cara Menjalankan](#cara-menjalankan)
-  - [Output dan Hasil](#output-dan-hasil-2)
-  - [Error dan Solusi](#error-dan-solusi-2)
-- [Revisi](#revisi)
-  - [Soal 2 - Poke MOO](#soal-2---poke-moo)
-  - [Soal 3 - LibraryIT](#soal-3---libraryit)
-    - [1. Poin Revisi & Dampaknya](#1-poin-revisi--dampaknya)
-    - [2. Perubahan Kode (Before vs After)](#2-perubahan-kode-before-vs-after)
-    - [3. Cara Menjalankan & Hasil Pengujian](#3-cara-menjalankan--hasil-pengujian)
+- [Soal 1 - Farewell Party](#soal-1---farewell-party)
+  - [Struktur Repository Soal 1](#struktur-repository-soal-1)
+  - [Penjelasan File Soal 1](#penjelasan-file-soal-1)
+  - [Poin 2 kernel.sh](#poin-2-kernelsh)
+  - [Poin 3 single.sh](#poin-3-singlesh)
+  - [Poin 4 multi.sh](#poin-4-multish)
+  - [Poin 5 iso.sh](#poin-5-isosh)
+  - [Poin 6 qemu.sh](#poin-6-qemush)
+  - [Poin 7 backup.sh](#poin-7-backupsh)
+  - [Poin 8 Internet Access](#poin-8-internet-access)
+  - [Poin 9 Package Manager party](#poin-9-package-manager-party)
+  - [Poin 10 FUSE](#poin-10-fuse)
+  - [Kendala dan Error Soal 1](#kendala-dan-error-soal-1)
+- [Soal 2 - Season](#soal-2---season)
+  - [Struktur Repository Soal 2](#struktur-repository-soal-2)
+  - [Penjelasan File Soal 2](#penjelasan-file-soal-2)
+    - [bochsrc.txt](#bochsrctxt)
+    - [Makefile](#makefile)
+    - [bootloader.asm](#bootloaderasm)
+    - [kernel.asm Poin 1](#kernelasm-poin-1)
+    - [kernel.c Poin 2-8](#kernelc-poin-2-8)
+  - [Run dan Hasil Soal 2](#run-dan-hasil-soal-2)
+    - [Poin 1 _getChar](#poin-1-_getchar)
+    - [Poin 2 check](#poin-2-check)
+    - [Poin 3 add](#poin-3-add)
+    - [Poin 4 sub](#poin-4-sub)
+    - [Poin 5 fac](#poin-5-fac)
+    - [Poin 6 season](#poin-6-season)
+    - [Poin 7 triangle](#poin-7-triangle)
+    - [Poin 8 clear dan help](#poin-8-clear-dan-help)
+  - [Kendala dan Error Soal 2](#kendala-dan-error-soal-2)
 
 ---
 
-## Persiapan Direktori dan Repository
+# Soal 1 - Farewell Party
+
+## Struktur Repository Soal 1
+
+```
+soal_1/
+├── .config              # Konfigurasi kernel Linux 6.1.1
+├── .gitignore           # File dan folder yang tidak di-push ke GitHub
+├── backup.sh            # Script untuk mengarsip hasil build
+├── iso.sh               # Script untuk membuat bootable ISO
+├── kernel.sh            # Script untuk download dan compile kernel Linux
+├── multi.sh             # Script untuk membangun multi-user filesystem
+├── osboot/              # Folder output hasil build
+│   ├── .gitkeep
+│   ├── bzImage          # Kernel hasil compile (di-ignore git)
+│   ├── single.gz        # Single-user initramfs (di-ignore git)
+│   ├── multi.gz         # Multi-user initramfs (di-ignore git)
+│   ├── farewell.iso     # Bootable ISO (di-ignore git)
+│   └── farewell_backup_[timestamp].zip
+├── qemu.sh              # Script untuk menjalankan OS via QEMU
+└── single.sh            # Script untuk membangun single-user filesystem
+```
+
+![Struktur Repo](asset/struk1.png)
+
+---
+
+## Penjelasan File Soal 1
+
+### `.config`
+
+File konfigurasi kernel Linux 6.1.1 yang digunakan saat compile. Dihasilkan dari `make defconfig` lalu dimodifikasi untuk mengaktifkan modul-modul wajib:
+
+- `CONFIG_BLK_DEV_INITRD` - dukungan initramfs
+- `CONFIG_DEVTMPFS` dan `CONFIG_DEVTMPFS_MOUNT` - auto-mount `/dev`
+- `CONFIG_FUSE_FS` - dukungan FUSE (untuk poin 10)
+- `CONFIG_SERIAL_8250` dan `CONFIG_SERIAL_8250_CONSOLE` - serial console (`ttyS0`)
+- `CONFIG_BINFMT_ELF` dan `CONFIG_BINFMT_SCRIPT` - dukungan eksekusi binary dan script
+- `CONFIG_PRINTK` - dukungan kernel log output
+
+---
+
+## Poin 2 kernel.sh
+
+**Fungsi:** Download dan compile Linux kernel 6.1.1, output: `osboot/bzImage`
 
 ```bash
-mkdir SISOP-4-2026-IT-068 && cd SISOP-4-2026-IT-068
-git init
-git remote add origin https://github.com/keisyaahm/SISOP-4-2026-IT-068.git
-git branch -M main
+#!/bin/bash
+echo "=== STEP 1: DOWNLOADING & COMPILING KERNEL ==="
+mkdir -p osboot
 
-mkdir -p soal_1/mnt
-mkdir -p soal_2/{encrypted_storage/tests,fuse_mount}
-mkdir -p soal_3/{data/{ebooks,papers,sourcecode,docs},logs}
+if [ ! -f "linux-6.1.1.tar.xz" ]; then
+    wget -nc https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.1.1.tar.xz
+fi
 
-cat > soal_1/.gitignore << 'EOF'
-kenz_rescue
-mnt/
-EOF
+rm -rf linux-6.1.1
+tar -xf linux-6.1.1.tar.xz
+cd linux-6.1.1
 
-cat > soal_2/.gitignore << 'EOF'
-fuse
-fuse_mount/
-client
-server
-EOF
+make defconfig
+scripts/config --enable CONFIG_BLK_DEV_INITRD
+scripts/config --enable CONFIG_DEVTMPFS
+scripts/config --enable CONFIG_DEVTMPFS_MOUNT
+scripts/config --enable CONFIG_FUSE_FS
+scripts/config --enable CONFIG_BINFMT_ELF
+scripts/config --enable CONFIG_BINFMT_SCRIPT
+scripts/config --enable CONFIG_SERIAL_8250
+scripts/config --enable CONFIG_SERIAL_8250_CONSOLE
+scripts/config --disable SYSTEM_TRUSTED_KEYS
+scripts/config --disable SYSTEM_REVOCATION_KEYS
+scripts/config --disable DEBUG_INFO_BTF
+scripts/config --disable WERROR
 
-git add .
-git commit -m "init: setup struktur repo modul 4"
-git push -u origin main
+make olddefconfig
+make -j$(nproc)
+
+cp arch/x86/boot/bzImage ../osboot/
+cd ..
+echo ">>> bzImage BERHASIL DIBUAT! <<<"
 ```
 
-Struktur akhir repository:
+**Cara menjalankan:**
 
+```bash
+cd ~/SISOP-5-2026-IT-068/soal_1
+./kernel.sh
 ```
-SISOP-4-2026-IT-068/
-├── soal_1/
-│   ├── kenz_rescue.c
-│   └── amba_files/
-│       ├── 1.txt
-│       └── ... 7.txt
-├── soal_2/
-│   ├── fuse.c
-│   ├── client.c
-│   └── Dockerfile
-└── soal_3/
-    ├── Dockerfile
-    ├── docker-compose.yml
-    ├── smb.conf
-    ├── entrypoint.sh
-    ├── data/
-    │   ├── ebooks/
-    │   ├── papers/
-    │   ├── sourcecode/
-    │   └── docs/
-    └── logs/
-        └── libraryit.log
+
+**Verifikasi:**
+
+```bash
+ls -lh osboot/bzImage
 ```
+
+![kernel run](asset/kernel.png)
+
+![bzimage](asset/bzimage.png)
 
 ---
 
-## Soal 1: Save Asisten Kenz
+## Poin 3 single.sh
 
-### Penjelasan Soal
+**Fungsi:** Membangun single-user initramfs menggunakan BusyBox, output: `osboot/single.gz`
 
-Sebastian menemukan flashdisk berisi 7 file log ekspedisi (`1.txt` s/d `7.txt`). Setiap file punya satu baris `KOORD: <fragmen>`. Tujuannya adalah menggabungkan semua fragmen koordinat tanpa mengubah isi flashdisk satu byte pun.
+**Spesifikasi yang dipenuhi:**
+- User: `root` (hanya root)
+- Direktori: `bin/`, `dev/`, `proc/`, `sys/`, `etc/`, `tmp/`, `root/`
+- Access: root bisa akses apapun
 
-Program FUSE `kenz_rescue.c` dibuat dengan 4 poin:
+**Komponen utama:**
+- BusyBox - menyediakan semua utilitas Unix dasar (`ls`, `sh`, `mount`, `ifconfig`, dll)
+- `party` (apk-tools-static dari Alpine Linux) - package manager yang di-rename
+- `/etc/passwd` - berisi data user root agar `whoami` bisa berjalan
+- init script - mount `/proc`, `/sys`, `/dev`, setup jaringan static (10.0.2.15 via QEMU user network), lalu `exec /bin/sh`
 
-- **Poin A** — Download `amba_files.zip`, unzip ke `amba_files/`, hapus zip-nya
-- **Poin B** — FUSE passthrough: `cat mnt/1.txt` identik dengan `cat amba_files/1.txt`
-- **Poin C** — File virtual `tujuan.txt` muncul di `ls mnt/` tapi tidak ada di `amba_files/`
-- **Poin D** — `cat mnt/tujuan.txt` menghasilkan konten on-the-fly dengan format `Tujuan Mas Amba: <gabungan KOORD>\n`
+**Cara menjalankan:**
 
-Struct FUSE yang digunakan:
+```bash
+cd ~/SISOP-5-2026-IT-068/soal_1
+./single.sh
+./qemu.sh --single
+```
 
-```c
-static struct fuse_operations kenz_ops = {
-    .getattr = kenz_getattr,
-    .readdir = kenz_readdir,
-    .open    = kenz_open,
-    .read    = kenz_read,
-};
+**Di dalam QEMU:**
 
-int main(int argc, char *argv[]) {
-    if (realpath(argv[1], source_dir) == NULL) {
-        perror("realpath"); return 1;
+```sh
+whoami
+ls /
+ls /bin | head -20
+```
+
+![single](asset/single.png)
+
+![single qemu](asset/single2.png)
+
+![single qemu 3](asset/single3.png)
+
+---
+
+## Poin 4 multi.sh
+
+**Fungsi:** Membangun multi-user initramfs, output: `osboot/multi.gz`
+
+**User dan Password:**
+
+| User | Password | UID | Home |
+|------|----------|-----|------|
+| root | root123 | 0 | /root |
+| henn | henn123 | 1001 | /home/henn |
+| hann | hann123 | 1002 | /home/hann |
+| viii | viii123 | 1003 | /home/viii |
+| kids | kids123 | 1004 | /home/kids |
+
+**Implementasi access control via file permission dan group:**
+
+| Direktori | Permission | Owner | Keterangan |
+|-----------|-----------|-------|------------|
+| `/root` | 700 | root:root | Hanya root |
+| `/home/henn` | 700 | 1001:1001 | Hanya henn |
+| `/home/hann` | 750 | 1002:1002 | hann dan henn (henn ada di group hann) |
+| `/home/viii` | 750 | 1003:1003 | viii, hann, henn (keduanya ada di group viii) |
+| `/home/kids` | 750 | 1004:1004 | kids, viii, hann, henn (semua ada di group kids) |
+| `/tmp` | 1777 | - | Full akses semua user |
+
+**Tabel access control:**
+
+| User | Bisa akses | Tidak bisa akses |
+|------|-----------|-----------------|
+| root | Semua direktori | - |
+| henn | `/home/*` semua | `/root` |
+| hann | `/home/{hann,viii,kids}` | `/root`, `/home/henn` |
+| viii | `/home/{viii,kids}` | `/root`, `/home/{henn,hann}` |
+| kids | `/home/kids` saja | `/root`, `/home/{henn,hann,viii}` |
+
+**Banner** - `/etc/profile` dijalankan saat login, menampilkan ASCII art "Farewell Party" dan `Welcome, <USER>.`
+
+**Init script** - mount filesystems, setup jaringan static, init party database, lalu `getty` pada `ttyS0` untuk login prompt.
+
+**Cara menjalankan:**
+
+```bash
+cd ~/SISOP-5-2026-IT-068/soal_1
+./multi.sh
+./qemu.sh --multi
+```
+
+**Test login root:**
+
+```
+Login: root
+Password: root123
+```
+
+```sh
+whoami
+ls /root
+ls /home
+```
+
+![multi](asset/multi.png)
+
+![multi qemu](asset/multi2.png)
+
+![multi root](asset/multiroot.png)
+
+**Test login henn:**
+
+```
+Login: henn
+Password: henn123
+```
+
+```sh
+ls /home/henn    # bisa
+ls /home/hann    # bisa (henn full /home/*)
+ls /home/viii    # bisa
+ls /root         # Permission denied
+```
+
+![multi henn](asset/multihenn.png)
+
+**Test login hann:**
+
+```
+Login: hann
+Password: hann123
+```
+
+```sh
+ls /home/hann    # bisa
+ls /home/viii    # bisa
+ls /home/kids    # bisa
+ls /home/henn    # Permission denied
+ls /root         # Permission denied
+```
+
+![multi hann](asset/multihann.png)
+
+**Test login viii:**
+
+```
+Login: viii
+Password: viii123
+```
+
+```sh
+ls /home/viii    # bisa
+ls /home/kids    # bisa
+ls /home/henn    # Permission denied
+ls /home/hann    # Permission denied
+ls /root         # Permission denied
+```
+
+![multi viii](asset/multiviii.png)
+
+**Test login kids:**
+
+```
+Login: kids
+Password: kids123
+```
+
+```sh
+ls /home/kids    # bisa
+ls /home/henn    # Permission denied
+ls /home/hann    # Permission denied
+ls /home/viii    # Permission denied
+ls /root         # Permission denied
+ls /tmp          # bisa (full access tmp semua user)
+```
+
+![multi kids](asset/multikids.png)
+
+---
+
+## Poin 5 iso.sh
+
+**Fungsi:** Membuat bootable ISO dengan GRUB yang memuat kedua filesystem, output: `osboot/farewell.iso`
+
+Script ini:
+1. Membuat struktur direktori ISO: `osboot/isodir/boot/grub/`
+2. Menyalin `bzImage`, `single.gz`, `multi.gz` ke dalam struktur ISO
+3. Membuat `grub.cfg` dengan dua menu entry: Multi User dan Single User
+4. Menjalankan `grub-mkrescue` untuk menghasilkan file `.iso`
+5. Membersihkan direktori sementara
+
+**grub.cfg:**
+
+```
+set timeout=10
+set default=0
+menuentry "Farewell Party - Multi User" {
+    linux  /boot/bzImage console=ttyS0 nomodeset
+    initrd /boot/multi.gz
+}
+menuentry "Farewell Party - Single User" {
+    linux  /boot/bzImage console=ttyS0 nomodeset
+    initrd /boot/single.gz
+}
+```
+
+**Cara menjalankan:**
+
+```bash
+cd ~/SISOP-5-2026-IT-068/soal_1
+./iso.sh
+ls -lh osboot/farewell.iso
+```
+
+![farewell iso](asset/iso.png)
+
+![ukuran iso](asset/ukiso.png)
+
+---
+
+## Poin 6 qemu.sh
+
+**Fungsi:** Menjalankan OS hasil build dengan 3 mode
+
+```bash
+#!/bin/bash
+NET_FLAGS="-netdev user,id=net0 -device e1000,netdev=net0"
+QEMU_CMD="qemu-system-x86_64 -smp 2 -m 512 -nographic"
+
+case "$1" in
+    --single)
+        $QEMU_CMD -kernel osboot/bzImage -initrd osboot/single.gz \
+                  -append "console=ttyS0 rdinit=/init" $NET_FLAGS ;;
+    --multi)
+        $QEMU_CMD -kernel osboot/bzImage -initrd osboot/multi.gz \
+                  -append "console=ttyS0 rdinit=/init" $NET_FLAGS ;;
+    --all)
+        $QEMU_CMD -cdrom osboot/farewell.iso $NET_FLAGS ;;
+    *)
+        echo "Usage: ./qemu.sh [--single|--multi|--all]"
+        exit 1 ;;
+esac
+```
+
+| Flag QEMU | Keterangan |
+|-----------|-----------|
+| `-smp 2` | 2 virtual CPU |
+| `-m 512` | RAM 512 MB |
+| `-nographic` | Output ke terminal tanpa window GUI |
+| `-netdev user` dan `-device e1000` | Jaringan virtual QEMU (NAT) |
+| `console=ttyS0` | Output kernel ke serial port ttyS0 |
+| `rdinit=/init` | Program pertama yang dijalankan kernel |
+
+**Cara menjalankan:**
+
+```bash
+# Boot single user langsung
+./qemu.sh --single
+
+# Boot multi user langsung
+./qemu.sh --multi
+
+# Boot dari ISO dengan menu GRUB
+./qemu.sh --all
+```
+
+Keluar dari QEMU: `Ctrl+A` lalu `X`
+
+![poin 6 single](asset/6single.png)
+
+![poin 6 multi](asset/6multi.png)
+
+![all multi](asset/allmulti.png)
+
+![masuk all multi](asset/mskallmulti.png)
+
+---
+
+## Poin 7 backup.sh
+
+**Fungsi:** Mengarsip semua file build ke dalam satu zip, lalu menghapus file aslinya
+
+```bash
+#!/bin/bash
+TIMESTAMP=$(date +"%d%m%Y-%H%M%S")
+ZIPNAME="osboot/farewell_backup_${TIMESTAMP}.zip"
+
+zip -j "$ZIPNAME" osboot/bzImage osboot/single.gz osboot/multi.gz osboot/farewell.iso
+rm -f osboot/bzImage osboot/single.gz osboot/multi.gz osboot/farewell.iso
+echo ">>> Backup selesai: $ZIPNAME <<<"
+```
+
+Format nama file: `farewell_backup_[DDMMYYYY-HHMMSS].zip`
+
+Flag `-j` pada zip berarti junk paths - simpan hanya file tanpa path lengkapnya.
+
+**Cara menjalankan:**
+
+```bash
+cd ~/SISOP-5-2026-IT-068/soal_1
+./backup.sh
+ls -lh osboot/
+```
+
+![backup](asset/backup.png)
+
+![isi backup](asset/isibackup.png)
+
+---
+
+## Poin 8 Internet Access
+
+**Cara menjalankan:**
+
+```bash
+./qemu.sh --single
+```
+
+**Di dalam QEMU:**
+
+```sh
+ping 8.8.8.8 -c 4
+wget example.com -O /dev/null
+```
+
+Catatan: Ping ke 8.8.8.8 menggunakan ICMP yang dibatasi oleh QEMU user networking di WSL2. Namun wget (TCP) berhasil, yang membuktikan koneksi internet berfungsi.
+
+![internet access](asset/accessi.png)
+
+---
+
+## Poin 9 Package Manager party
+
+`party` adalah binary `apk.static` dari Alpine Linux v3.18 yang diunduh saat build dan di-rename menjadi `party`. Ini adalah package manager yang fully static sehingga dapat berjalan di dalam initramfs minimal tanpa library tambahan.
+
+**Cara menjalankan:**
+
+```bash
+./qemu.sh --single
+```
+
+**Di dalam QEMU:**
+
+```sh
+party --version
+party update --allow-untrusted --no-cache
+party add --allow-untrusted --no-cache busybox
+```
+
+![party](asset/party.png)
+
+---
+
+## Poin 10 FUSE
+
+**Di dalam QEMU single user:**
+
+```sh
+# Install FUSE via party
+party add --allow-untrusted --no-cache fuse
+
+# Verifikasi
+ls /bin/fusermount
+
+# Buat program FUSE sederhana
+cat > /tmp/hello_fuse.c << 'EOF'
+#define FUSE_USE_VERSION 26
+#include <fuse.h>
+#include <string.h>
+#include <errno.h>
+
+static int hello_getattr(const char *path, struct stat *stbuf) {
+    memset(stbuf, 0, sizeof(struct stat));
+    if (strcmp(path, "/") == 0) {
+        stbuf->st_mode = S_IFDIR | 0755;
+        stbuf->st_nlink = 2;
+    } else if (strcmp(path, "/hello") == 0) {
+        stbuf->st_mode = S_IFREG | 0444;
+        stbuf->st_nlink = 1;
+        stbuf->st_size = 13;
+    } else {
+        return -ENOENT;
     }
-    // Teruskan argv[2] (mount point) ke fuse_main
-    char *fuse_argv[3];
-    fuse_argv[0] = argv[0];
-    fuse_argv[1] = argv[2];
-    fuse_argv[2] = NULL;
-    return fuse_main(2, fuse_argv, &kenz_ops, NULL);
-}
-```
-
----
-
-### Poin A Download dan Setup
-
-```bash
-cd ~/SISOP-4-2026-IT-068/soal_1
-curl -L "https://drive.google.com/uc?export=download&id=1nLXFhptDo2mnUlZsw8pTWyAVpV49W20U" \
-  -o amba_files.zip
-unzip amba_files.zip
-rm amba_files.zip   # wajib dihapus sesuai soal
-ls amba_files/      # harus muncul 1.txt s/d 7.txt
-```
-
----
-
-### Poin B Passthrough (getattr, readdir, open, read)
-
-Semua operasi untuk file `1.txt`–`7.txt` diteruskan langsung ke source directory. Helper `build_path` membangun path fisik dari `source_dir + virtual path`:
-
-```c
-static void build_path(char *buf, size_t size, const char *path) {
-    snprintf(buf, size, "%s%s", source_dir, path);
-}
-
-// getattr passthrough
-char real[PATH_MAX];
-build_path(real, sizeof(real), path);
-int res = lstat(real, st);
-
-// readdir — baca isi folder source
-DIR *dp = opendir(source_dir);
-while ((de = readdir(dp)) != NULL) {
-    if (de->d_name[0] == '.') continue;
-    filler(buf, de->d_name, NULL, 0);
-}
-
-// read passthrough
-int fd = open(real, O_RDONLY);
-int res = pread(fd, buf, size, offset);
-```
-
----
-
-### Poin C Virtual File `tujuan.txt`
-
-`tujuan.txt` tidak ada di `amba_files/` tapi harus muncul di `ls mnt/`. Dicapai dengan membuat stat buatan di `getattr` dan menambahkan entry di `readdir`:
-
-```c
-if (strcmp(path, "/tujuan.txt") == 0) {
-    char tmp[4096];
-    int len = generate_tujuan(tmp, sizeof(tmp));
-    st->st_mode  = S_IFREG | 0444;  // read-only
-    st->st_nlink = 1;
-    st->st_size  = len;             // ukuran konsisten dengan isi
-    st->st_atime = st->st_mtime = st->st_ctime = 0; // timestamp epoch
     return 0;
 }
 
-// Di readdir — tambahkan entry virtual
-filler(buf, "tujuan.txt", NULL, 0);
-```
-
----
-
-### Poin D On-the-fly Content `tujuan.txt`
-
-Saat `cat mnt/tujuan.txt`, fungsi `generate_tujuan` membuka `1.txt`–`7.txt`, mencari baris `KOORD: `, dan menggabungkannya:
-
-```c
-static int generate_tujuan(char *buf, size_t buf_size) {
-    char result[4096] = {0};
-    strncpy(result, "Tujuan Mas Amba: ", sizeof(result) - 1);
-
-    for (int i = 1; i <= 7; i++) {
-        char filepath[PATH_MAX * 2];
-        snprintf(filepath, sizeof(filepath), "%s/%d.txt", source_dir, i);
-
-        FILE *fp = fopen(filepath, "r");
-        if (!fp) continue;
-
-        char line[512];
-        while (fgets(line, sizeof(line), fp)) {
-            if (strncmp(line, "KOORD: ", 7) == 0) {
-                char *val = line + 7;
-                size_t len = strlen(val);
-                if (len > 0 && val[len-1] == '\n') val[len-1] = '\0';
-                strncat(result, val, sizeof(result) - strlen(result) - 1);
-                break; // satu KOORD per file
-            }
-        }
-        fclose(fp);
-    }
-    strncat(result, "\n", sizeof(result) - strlen(result) - 1);
-
-    size_t total = strlen(result);
-    if (total > buf_size) total = buf_size;
-    memcpy(buf, result, total);
-    return (int)total;
+static int hello_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+                         off_t offset, struct fuse_file_info *fi) {
+    filler(buf, ".", NULL, 0);
+    filler(buf, "..", NULL, 0);
+    filler(buf, "hello", NULL, 0);
+    return 0;
 }
-```
 
----
+static int hello_read(const char *path, char *buf, size_t size,
+                      off_t offset, struct fuse_file_info *fi) {
+    const char *content = "Hello, FUSE!\n";
+    size_t len = 13;
+    if (offset >= len) return 0;
+    if (offset + size > len) size = len - offset;
+    memcpy(buf, content + offset, size);
+    return size;
+}
 
-### Cara Kompilasi dan Menjalankan
-
-```bash
-# Install dependency
-sudo apt install -y libfuse-dev pkg-config fuse
-
-# Compile
-gcc -Wall -o kenz_rescue kenz_rescue.c $(pkg-config fuse --cflags --libs)
-
-# Mount
-./kenz_rescue amba_files mnt
-
-# Verifikasi mount
-mountpoint mnt
-```
-
-![compile](./asets/SOAL1.png)
-
----
-
-### Output dan Hasil
-
-**Pembuktian Poin A & B: Cek Virtual File**
-```bash
-ls mnt
-```
-
-**Test Poin B Passthrough byte-identical:**
-
-```bash
-for i in 1 2 3 4 5 6 7; do
-    diff mnt/$i.txt amba_files/$i.txt && echo "$i.txt OK"
-done
-```
-
-Output:
-```
-1.txt OK
-2.txt OK
-3.txt OK
-4.txt OK
-5.txt OK
-6.txt OK
-7.txt OK
-```
-
-**Test Poin C Virtual file:**
-
-```bash
-ls mnt/        # ada tujuan.txt
-ls amba_files/ # tidak ada tujuan.txt
-stat mnt/tujuan.txt
-```
-
-Output stat:
-```
-Access: (0444/-r--r--r--)
-Size: 66
-Modify: 1970-01-01 07:00:00
-```
-
-**Test Poin D — On-the-fly content:**
-
-```bash
-cat mnt/tujuan.txt
-# Output: Tujuan Mas Amba: <gabungan koordinat dari 7 file>
-
-wc -c mnt/tujuan.txt
-# Angka harus sama dengan Size di stat (66)
-```
-
-![Output FUSE Soal 1 — ls mnt/, cat mnt/tujuan.txt, stat, dan diff passthrough](./asets/RUNSOAL1.png)
-
-**Unmount:**
-
-```bash
-fusermount -u mnt
-mountpoint mnt   # mnt is not a mountpoint
-ls mnt/          # kosong
-```
-![unmount](./asets/unSOAL1.png)
-
----
-
-### Error dan Solusi
-
-**Error 1 — Warning compile `'%d' directive output may be truncated`**
-
-```
-kenz_rescue.c:29:50: warning: '%d' directive output may be truncated
-```
-
-Penyebab: Buffer `PATH_MAX` (4096) secara teoritis bisa penuh jika path panjang dikombinasikan dengan `%s/%d.txt`.
-
-Solusi: Perbesar buffer filepath:
-
-```c
-// Sebelum
-char filepath[PATH_MAX];
-
-// Sesudah — beri ruang lebih
-char filepath[PATH_MAX * 2];
-```
-
-**Error 2 — `cat mnt/tujuan.txt: No such file or directory`**
-
-Penyebab: Working directory salah — masih berada di dalam `amba_files/`.
-
-Solusi:
-```bash
-cd ~/SISOP-4-2026-IT-068/soal_1
-cat mnt/tujuan.txt
-```
-
----
-
-## Soal 2: Poke MOO
-
-### Penjelasan Soal
-
-MOO ingin mini-database service yang aman dari pengintip. Semua file yang dibuat lewat `fuse_mount` harus terenkripsi XOR key `0x76` dan disimpan di `encrypted_storage` dengan ekstensi `.enc`.
-
-- **Poin A & B** FUSE lengkap 12 operasi: `getattr`, `readdir`, `mkdir`, `rmdir`, `create`, `open`, `read`, `write`, `truncate`, `unlink`, `access`, `utimens`
-- **Poin C** Enkripsi/dekripsi XOR on-the-fly: `halo.txt` di fuse_mount → `halo.txt.enc` di encrypted_storage
-- **Poin D** `notes.csv.enc` di `encrypted_storage/tests/` → terbaca plaintext lewat `fuse_mount/tests/notes.csv`
-- **Containerization** Image Docker `soal-2-modul-4-sisop`, container `db_app` dengan bind mount
-- **Integration** `client.c` TCP interaktif ke server port 9000
-
-Struct FUSE yang digunakan:
-
-```c
-static struct fuse_operations moo_ops = {
-    .getattr  = moo_getattr,
-    .access   = moo_access,
-    .readdir  = moo_readdir,
-    .mkdir    = moo_mkdir,
-    .rmdir    = moo_rmdir,
-    .create   = moo_create,
-    .open     = moo_open,
-    .read     = moo_read,
-    .write    = moo_write,
-    .truncate = moo_truncate,
-    .unlink   = moo_unlink,
-    .utimens  = moo_utimens,
+static struct fuse_operations hello_oper = {
+    .getattr = hello_getattr,
+    .readdir = hello_readdir,
+    .read    = hello_read,
 };
-```
 
----
-
-### Poin A & B FUSE Penuh dengan Enkripsi
-
-Semua path file di `fuse_mount` dipetakan ke `.enc` di `encrypted_storage`:
-
-```c
-// Untuk file: tambahkan ekstensi .enc
-snprintf(enc_path, sizeof(enc_path), "%s%s.enc", enc_storage, path);
-
-// Untuk folder: tidak tambahkan .enc
-snprintf(dir_path, sizeof(dir_path), "%s%s", enc_storage, path);
-```
-
-`readdir` menampilkan nama file tanpa ekstensi `.enc`:
-
-```c
-// Hapus .enc dari nama saat ditampilkan ke user
-size_t len = strlen(display_name);
-if (len > 4 && strcmp(display_name + len - 4, ".enc") == 0) {
-    display_name[len - 4] = '\0';
+int main(int argc, char *argv[]) {
+    return fuse_main(argc, argv, &hello_oper, NULL);
 }
-filler(buf, display_name, NULL, 0);
+EOF
+
+gcc /tmp/hello_fuse.c -o /tmp/hello_fuse $(pkg-config fuse --cflags --libs)
+mkdir -p /tmp/mnt
+/tmp/hello_fuse /tmp/mnt &
+sleep 1
+cat /tmp/mnt/hello
+fusermount -u /tmp/mnt
+```
+
+**Ekspektasi output:**
+
+```
+Hello, FUSE!
+```
+
+![fuse](asset/fuse.png)
+
+---
+
+## Kendala dan Error Soal 1
+
+### 1. bzImage Terlalu Kecil (1.4MB)
+
+**Masalah:** Kernel dikompilasi dengan config yang tidak lengkap sehingga menghasilkan bzImage hanya 1.4MB dan tidak bisa boot initramfs.
+
+**Solusi:** Mengaktifkan `CONFIG_BLK_DEV_INITRD`, `CONFIG_PRINTK`, dan `CONFIG_SERIAL_8250_CONSOLE` via `scripts/config --enable` sebelum `make olddefconfig`.
+
+### 2. QEMU Layar Kosong
+
+**Masalah:** Setelah boot, terminal QEMU kosong tanpa output apapun.
+
+**Solusi:** `CONFIG_PRINTK` tidak aktif di `.config`. Setelah diaktifkan dan kernel dikompilasi ulang, output muncul di terminal via `console=ttyS0`.
+
+### 3. VFS: Unable to mount root fs
+
+**Masalah:** Kernel panic karena tidak bisa mount initramfs.
+
+**Solusi:** `CONFIG_BLK_DEV_INITRD` tidak aktif. Setelah diaktifkan dan kernel dikompilasi ulang, initramfs berhasil dimount.
+
+### 4. Device Files Tidak Bisa Di-copy di WSL
+
+**Masalah:** `cp -a /dev/null` dan perintah serupa gagal dengan error `Operation not permitted` di WSL.
+
+**Solusi:** Menggunakan `CONFIG_DEVTMPFS_MOUNT=y` di kernel config sehingga kernel otomatis populate `/dev` saat boot tanpa perlu copy device files ke initramfs secara manual.
+
+### 5. `party database` Error
+
+**Masalah:** `party update` gagal dengan `Failed to open apk database: No such file or directory`.
+
+**Solusi:** Membuat direktori `/lib/apk/db`, `/var/cache/apk`, dan file `/etc/apk/repositories` di dalam init script sebelum menjalankan `party update`.
+
+### 6. Access Control kids Bisa Akses Folder Lain
+
+**Masalah:** User `kids` bisa mengakses `/home/hann` dan `/home/viii` yang seharusnya tidak bisa.
+
+**Solusi:** Proses `cpio` harus dijalankan dengan `sudo` agar ownership yang di-set lewat `sudo chown` tersimpan dengan benar ke dalam arsip initramfs.
+
+### 7. Ping 8.8.8.8 Gagal
+
+**Masalah:** `ping 8.8.8.8` gagal dengan "Network is unreachable" meskipun `wget` berhasil.
+
+**Solusi:** QEMU user networking membatasi ICMP (ping) di WSL2. Koneksi internet tetap berfungsi via TCP, dibuktikan dengan `wget example.com` yang berhasil (HTTP 200 OK).
+
+---
+
+# Soal 2 - Season
+
+## Struktur Repository Soal 2
+
+```
+soal_2/
+├── Makefile          # Build automation dan run via Bochs Windows
+├── README.md         # Laporan resmi
+├── bochsrc.txt       # Konfigurasi emulator Bochs
+├── bootloader.asm    # Bootloader 16-bit (memuat kernel ke memori)
+├── build.sh          # Script build alternatif
+├── kernel.asm        # Kernel assembly (_putInMemory, _getChar)
+└── kernel.c          # Kernel C (semua logic command)
 ```
 
 ---
 
-### Poin C Enkripsi/Dekripsi XOR On-the-fly
+## Penjelasan File Soal 2
 
-XOR bersifat reversibel — operasi enkripsi dan dekripsi identik:
+### `bochsrc.txt`
+
+Konfigurasi emulator Bochs yang menjalankan floppy disk image.
+
+```
+megs: 32
+romimage: file="C:/Program Files/Bochs-3.0/BIOS-bochs-latest"
+vgaromimage: file="C:/Program Files/Bochs-3.0/VGABIOS-lgpl-latest.bin"
+boot: floppy
+floppya: 1_44="C:/Users/ASUS/Desktop/floppy.img", status=inserted
+log: bochslog.txt
+mouse: enabled=0
+display_library: win32
+```
+
+- `megs: 32` - alokasi RAM 32 MB untuk emulasi
+- `romimage` dan `vgaromimage` - BIOS dan VGA BIOS dari instalasi Bochs Windows
+- `boot: floppy` - boot dari floppy disk
+- `floppya` - path ke file `floppy.img` yang akan dijalankan (disalin ke Desktop Windows)
+- `display_library: win32` - tampilkan output di window Windows
+
+---
+
+### `Makefile`
+
+Build automation untuk compile dan menjalankan sistem operasi.
+
+```makefile
+prepare:
+	dd if=/dev/zero of=floppy.img bs=512 count=2880
+
+bootloader:
+	nasm -f bin bootloader.asm -o bootloader.bin
+	dd if=bootloader.bin of=floppy.img bs=512 count=1 conv=notrunc
+
+kernel:
+	nasm -f as86 kernel.asm -o kernel-asm.o
+	bcc -ansi -c kernel.c -o kernel.o
+	ld86 -0 -d -o kernel.bin kernel-asm.o kernel.o
+	dd if=kernel.bin of=floppy.img bs=512 seek=1 conv=notrunc
+
+build: prepare bootloader kernel
+
+run:
+	mkdir -p "/mnt/c/Users/ASUS/Desktop"
+	cp floppy.img "/mnt/c/Users/ASUS/Desktop/floppy.img"
+	"/mnt/c/Program Files/Bochs-3.0/bochs.exe" -f bochsrc.txt -q
+```
+
+| Target | Perintah | Fungsi |
+|--------|---------|--------|
+| `prepare` | `make prepare` | Buat floppy.img kosong 1.44 MB (2880 x 512 byte) |
+| `bootloader` | `make bootloader` | Compile bootloader.asm, tulis ke sektor 0 floppy |
+| `kernel` | `make kernel` | Compile kernel.asm dan kernel.c, tulis ke sektor 1-15 floppy |
+| `build` | `make build` | Jalankan semua: prepare + bootloader + kernel |
+| `run` | `make run` | Salin floppy.img ke Desktop Windows, jalankan Bochs |
+
+**Alasan menggunakan Bochs Windows dari WSL:** Bochs diinstall di Windows (`C:/Program Files/Bochs-3.0/`). WSL dapat menjalankan executable Windows langsung via path `/mnt/c/...`, sehingga build dilakukan di WSL (Linux tools) tapi emulasi dilakukan di Bochs Windows yang punya display.
+
+---
+
+### `bootloader.asm`
+
+Bootloader 16-bit yang bertugas memuat kernel dari floppy ke memori RAM.
+
+```asm
+bits 16
+
+KERNEL_SEGMENT equ 0x1000
+KERNEL_SECTORS equ 15
+KERNEL_START   equ 1
+```
+
+**Alur kerja bootloader:**
+1. BIOS memuat 512 byte pertama (sektor 0) ke alamat `0x7C00` dan menjalankannya
+2. Bootloader membaca 15 sektor dari floppy menggunakan BIOS interrupt `int 0x13` ke alamat `0x1000:0x0000`
+3. Setup segment registers ke `0x1000` dan set stack pointer
+4. Jump ke kernel di `0x1000:0x0000`
+5. Byte terakhir: `times 510-($-$$) db 0` dan `dw 0xAA55` (magic number MBR)
+
+---
+
+### `kernel.asm` (Soal Poin 1)
+
+Assembly kernel yang mengekspos fungsi-fungsi low-level ke kode C.
+
+```asm
+bits 16
+
+global _start
+global _putInMemory
+global _getChar
+extern _main
+```
+
+**`_start`** - Entry point kernel:
+
+```asm
+_start:
+    cli
+    mov ax, cs
+    mov ds, ax
+    mov es, ax
+    sti
+    call _main
+.hang:
+    jmp .hang
+```
+
+**`_putInMemory(segment, address, character)`** - Tulis karakter ke VGA memory:
+
+```asm
+_putInMemory:
+    push bp
+    mov bp, sp
+    push ds
+    mov ax, [bp+4]
+    mov si, [bp+6]
+    mov cl, [bp+8]
+    mov ds, ax
+    mov [si], cl
+    pop ds
+    pop bp
+    ret
+```
+
+VGA text mode memetakan karakter ke `0xB8000` = `0xB000:0x8000`. Setiap sel terdiri dari 2 byte: byte karakter dan byte atribut warna.
+
+**`_getChar()`** (implementasi soal) - Baca karakter dari keyboard:
+
+```asm
+_getChar:
+    push bp
+    mov bp, sp
+    mov ah, 0x00
+    int 0x16
+    xor ah, ah
+    pop bp
+    ret
+```
+
+`int 0x16` (AH=00h) adalah BIOS interrupt untuk membaca keystroke. Program akan blocking sampai ada tombol ditekan. Return value di `AL` adalah kode ASCII karakter.
+
+---
+
+### `kernel.c` (Soal Poin 2-8)
+
+Implementasi semua command dalam sistem operasi sederhana 16-bit.
+
+**Helper Functions:**
+
+`mod()` dan `div()` - Menggantikan operator `/` dan `%`:
 
 ```c
-#define XOR_KEY 0x76
+int mod(int a, int b) { while (a >= b) a -= b; return a; }
+int div(int a, int b) { int q = 0; while (a >= b) { a -= b; q++; } return q; }
+```
 
-static void xor_buffer(char *buf, size_t size) {
-    for (size_t i = 0; i < size; i++) {
-        buf[i] ^= XOR_KEY;
+`clearScreen()` - Isi seluruh VGA buffer (80x25 = 2000 sel) dengan spasi:
+
+```c
+void clearScreen() {
+    int i;
+    for (i = 0; i < 2000; i++) {
+        putInMemory(0xB000, 0x8000 + i * 2, ' ');
+        putInMemory(0xB000, 0x8001 + i * 2, color);
     }
-}
-
-// READ: baca .enc → XOR → tampilkan plaintext ke user
-static int moo_read(...) {
-    int res = pread(fd, buf, size, offset);
-    xor_buffer(buf, res);   // dekripsi on-the-fly
-    return res;
-}
-
-// WRITE: terima plaintext dari user → XOR → simpan ke .enc
-static int moo_write(...) {
-    char *enc_buf = malloc(size);
-    memcpy(enc_buf, buf, size);
-    xor_buffer(enc_buf, size);   // enkripsi on-the-fly
-    int res = pwrite(fd, enc_buf, size, offset);
-    free(enc_buf);
-    return res;
+    cursor = 0;
 }
 ```
 
----
-
-### Containerization Dockerfile
-
-```dockerfile
-FROM ubuntu:latest
-WORKDIR /app
-COPY server /app/server
-RUN mkdir -p /app/db && chmod +x /app/server
-EXPOSE 9000
-CMD ["./server"]
-```
-
-```bash
-# Build image
-docker build -t soal-2-modul-4-sisop .
-
-# Jalankan container dengan bind mount fuse_mount ke /app/db
-docker run -d \
-  --name db_app \
-  -p 9000:9000 \
-  -v $(pwd)/fuse_mount:/app/db \
-  soal-2-modul-4-sisop
-
-docker ps -a | grep db_app
-```
-
----
-
-### Integration `client.c`
+`atoi(str)` - Konversi string ke integer, mendukung angka negatif:
 
 ```c
-// Connect ke server port 9000
-sock = socket(AF_INET, SOCK_STREAM, 0);
-connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
-
-// Loop interaktif
-while (1) {
-    printf("db > ");
-    fgets(send_buf, sizeof(send_buf), stdin);
-    send(sock, send_buf, strlen(send_buf), 0);
-    int n = recv(sock, recv_buf, sizeof(recv_buf) - 1, 0);
-    printf("%s", recv_buf);
+int atoi(char *str) {
+    int res = 0, sign = 1;
+    if (*str == '-') { sign = -1; str++; }
+    while (*str >= '0' && *str <= '9') {
+        res = res * 10 + (*str - '0');
+        str++;
+    }
+    return res * sign;
 }
 ```
 
-```bash
-# Compile
-gcc -Wall -o client client.c
+`printInt(n)` - Cetak integer signed, dengan `printUInt()` untuk nilai positif:
 
-# Jalankan
-./client
+```c
+void printInt(int n) {
+    if (n == 0) { printChar('0'); return; }
+    if (n < 0) { printChar('-'); n = -n; }
+    printUInt((unsigned int)n);
+}
+```
+
+**Command Parser di `main()`:**
+
+```c
+while (cmd[ptr] != ' ' && cmd[ptr] != '\0') { command[cmd_len++] = cmd[ptr++]; }
+while (cmd[ptr] != ' ' && cmd[ptr] != '\0') { arg1[arg1_len++]   = cmd[ptr++]; }
+while (cmd[ptr] != ' ' && cmd[ptr] != '\0') { arg2[arg2_len++]   = cmd[ptr++]; }
+```
+
+**Tabel Implementasi Command:**
+
+| Command | Soal | Implementasi |
+|---------|------|-------------|
+| `check` | Poin 2 | `strcmp(command, "check") == 0` lalu print "ok" |
+| `add a b` | Poin 3 | `atoi(arg1) + atoi(arg2)` lalu `printInt()` |
+| `sub a b` | Poin 4 | `atoi(arg1) - atoi(arg2)` lalu `printInt()` |
+| `fac n` | Poin 5 | Loop multiply, cek `n > 7` untuk overflow |
+| `season name` | Poin 6 | Set global `color`, print mode |
+| `triangle n` | Poin 7 | Nested loop cetak karakter 'x' |
+| `clear` | Poin 8 | `clearScreen()` |
+| `help` | Poin 8 | Print list semua command |
+| `about` | - | Print info sistem |
+
+**Faktorial dan batas 16-bit (Poin 5):**
+
+```c
+if (n < 0 || n > 7) {
+    printString("know your limit little bro.\n");
+} else {
+    res = 1;
+    for (i = 1; i <= n; i++) res = res * i;
+    printUInt(res);
+}
+```
+
+Batas `n > 7` karena `8! = 40320 > 32767` (max signed 16-bit int). Di sistem 16-bit, overflow tidak terdeteksi otomatis, sehingga dicek secara eksplisit. `res` bertipe `unsigned int` agar `7! = 5040` tetap aman.
+
+**Season - Warna VGA (Poin 6):**
+
+| Season | Color Code | Warna |
+|--------|-----------|-------|
+| winter | `0x09` | Light Blue |
+| spring | `0x0A` | Light Green |
+| summer | `0x0E` | Yellow |
+| fall | `0x06` | Brown/Dark Yellow |
+| radiant | `0x0D` | Light Magenta |
+
+Color byte di VGA text mode = `(background << 4) | foreground`. Perubahan `color` global akan mempengaruhi semua teks yang dicetak sesudahnya.
+
+---
+
+## Run dan Hasil Soal 2
+
+### Build
+
+```bash
+cd ~/SISOP-5-2026-IT-068/soal_2
+make build
+ls -lh floppy.img kernel.bin bootloader.bin
+```
+
+![make build](asset/makebuild.png)
+
+![floppy hasil build](asset/floppy.png)
+
+### Run Bochs
+
+```bash
+make run
+```
+
+Bochs Windows akan terbuka. Karena menggunakan flag `-q`, Bochs langsung start tanpa prompt. Program langsung berjalan menampilkan welcome screen.
+
+![run make run](asset/makerun.png)
+
+---
+
+## Poin 1 _getChar
+
+Dibuktikan dengan kemampuan mengetik di shell. Semua command berikut membuktikan `_getChar` berfungsi karena tanpa fungsi ini tidak ada input yang bisa diterima dari keyboard.
+
+---
+
+## Poin 2 check
+
+```
+> check
+ok
 ```
 
 ---
 
-### Cara Kompilasi dan Menjalankan
+## Poin 3 add
 
-```bash
-cd ~/SISOP-4-2026-IT-068/soal_2
-
-# Compile FUSE
-gcc -Wall -o fuse fuse.c $(pkg-config fuse --cflags --libs)
-
-# Mount (jalankan sebelum Docker)
-./fuse encrypted_storage fuse_mount
-mountpoint fuse_mount
+```
+> add 5 3
+8
+> add 14 2
+16
 ```
 
 ---
 
-### Output dan Hasil
-
-**Test Poin B & C Enkripsi XOR:**
-
-```bash
-echo "isinya ini harusnya" | sudo tee fuse_mount/file1.txt > /dev/null
-
-sudo cat fuse_mount/file1.txt
-# Output: isinya ini harusnya
-
-sudo ls encrypted_storage/
-# Output: file1.txt.enc  soal2  tests
-
-sudo cat encrypted_storage/file1.txt.enc
-# Output: VV| (karakter terenkripsi XOR — newline ikut terenkripsi sehingga prompt terminal menyambung)
-
-sudo xxd encrypted_storage/file1.txt.enc
-# Output: 
-# 00000000: 1f05 1f18 0f17 561f 181f 561e 1704 0305  ......V...V.....
-# 00000010: 180f 177c                                ...|
-# (Membuktikan data utuh namun berwujud non-printable ASCII)
-```
-
-**Test Poin D `notes.csv.enc` terdekripsi:**
-
-```bash
-sudo cat fuse_mount/soal2/users.csv
-# Output: 
-# email,pass
-# keisya@its.ac.id,pass123
-# catherina@stu.untar.ac.id,erine123
-```
-
-![Output FUSE Soal 2 enkripsi XOR, ls encrypted_storage, cat fuse_mount, cat .enc](./asets/2SOAL2.png)
-
-> **Gambar:** `cat fuse_mount/file1.txt` menampilkan plaintext, `cat encrypted_storage/file1.txt.enc` menampilkan data terenkripsi, dan `cat fuse_mount/tests/notes.csv` berhasil mendekripsi `notes.csv.enc`.
-
-**Test Docker:**
-
-```bash
-sudo docker images | grep soal-2-modul-4-sisop
-sudo docker ps -a | grep db_app
-```
-
-Output:
-```
-soal-2-modul-4-sisop:latest      8905cd6d5490        157MB
-8c9fa48580b1   soal-2-modul-4-sisop   "./server"   About an hour ago   Up About an hour   0.0.0.0:9000->9000/tcp, [::]:9000->9000/tcp   db_app
-```
-
-![Output Docker docker images dan docker ps](./asets/3SOAL2.png)
-
-
-**Test Integration — Client:**
+## Poin 4 sub
 
 ```
-Connected to DB Server on port 9000
-Type HELP for available commands
-
-db > CREATE DATABASE tests
-DATABASE CREATED
-
-db > CREATE TABLE tests users email password
-TABLE CREATED
-
-db > LIST DATABASE
-tests
-
-db > LIST TABLE tests
-users.csv
-```
-
-**Verifikasi file terenkripsi dari operasi database:**
-
-```bash
-ls encrypted_storage/tests/
-# Output: history.log.enc  users.csv.enc
-```
-![Output](./asets/4SOAL2.png)
-
-
----
-
-### Error dan Solusi
-
-**Error 1 — `fuse: mountpoint is not empty`**
-
-```
-./fuse encrypted_storage fuse_mount
-fuse: mountpoint is not empty
-```
-
-Penyebab: Docker bind mount mengisi `fuse_mount` sebelum FUSE di-mount.
-
-Solusi:
-```bash
-fusermount -u fuse_mount 2>/dev/null
-./fuse encrypted_storage fuse_mount -o nonempty
-```
-
-**Error 2 — `realpath encrypted_storage: No such file or directory`**
-
-```
-./fuse -o nonempty encrypted_storage fuse_mount
-realpath encrypted_storage: No such file or directory
-```
-
-Penyebab: Flag `-o` diletakkan sebelum argumen source dan mount.
-
-Solusi: Flag `-o` harus di akhir:
-```bash
-# SALAH
-./fuse -o nonempty encrypted_storage fuse_mount
-
-# BENAR
-./fuse encrypted_storage fuse_mount -o nonempty
-```
-
-**Error 3 — `allow_other only allowed if user_allow_other is set`**
-
-```
-fusermount: option allow_other only allowed if 'user_allow_other'
-is set in /etc/fuse.conf
-```
-
-Solusi:
-```bash
-sudo nano /etc/fuse.conf
-# Uncomment baris: user_allow_other
-# Pastikan di baris sendiri tanpa teks lain
-```
-
-**Error 4 — `bind: Address already in use`**
-
-```
-./server
-bind: Address already in use
-```
-
-Solusi:
-```bash
-sudo kill -9 $(sudo lsof -t -i :9000)
-```
-
-**Error 5 — `ERROR: Database not found` setelah `CREATE DATABASE`**
-
-```
-db > CREATE DATABASE tests
-DATABASE CREATED
-db > CREATE TABLE tests users email password
-ERROR: Database not found
-```
-
-Penyebab: Server binary hardcode path `/app/db`, perlu bind mount atau jalankan dari dalam container.
-
-Solusi:
-```bash
-sudo mkdir -p /app/db
-sudo mount --bind $(pwd)/fuse_mount /app/db
-```
-
-![tree soal 2](./asets/treeSOAL2.png)
-
----
-
-## Soal 3: LibraryIT
-
-### Penjelasan Soal
-
-Membangun infrastruktur perpustakaan digital IT Library Nusantara menggunakan Docker dan Samba. Seluruh konfigurasi berjalan otomatis tanpa setup manual setelah `docker-compose up`.
-
-- **Poin A** Container `libraryit-server` dengan 3 user, 2 group, 4 folder koleksi
-- **Poin B** Aturan akses berbasis group per koleksi
-- **Poin C** Data persistent (bind mount), `sourcecode` permission 750, `docs` read-only dari host
-- **Poin D** Logging ke `libraryit.log`, service `libraryit-logger` monitor real-time
-
----
-
-### Poin A User, Group, dan Folder
-
-`entrypoint.sh` menjalankan semua setup otomatis saat container start:
-
-```bash
-#!/bin/bash
-set -e
-
-# Buat group
-groupadd -g 50 staff    2>/dev/null || true
-groupadd -g 51 readonly 2>/dev/null || true
-
-# Buat user sistem
-useradd -M -s /sbin/nologin -u 1000 -g readonly member      2>/dev/null || true
-useradd -M -s /sbin/nologin -u 1001 -g staff    contributor 2>/dev/null || true
-useradd -M -s /sbin/nologin -u 1002 -g staff    librarian   2>/dev/null || true
-
-# Daftarkan user ke Samba dengan password
-(echo "member123";  echo "member123")  | smbpasswd -a -s member
-(echo "contrib456"; echo "contrib456") | smbpasswd -a -s contributor
-(echo "lib789";     echo "lib789")     | smbpasswd -a -s librarian
-
-smbpasswd -e member && smbpasswd -e contributor && smbpasswd -e librarian
-
-# Setup folder dan permission
-mkdir -p /libraryit/{ebooks,papers,sourcecode,docs,logs}
-chown root:staff /libraryit/ebooks     && chmod 775 /libraryit/ebooks
-chown root:staff /libraryit/papers     && chmod 775 /libraryit/papers
-chown root:staff /libraryit/sourcecode && chmod 750 /libraryit/sourcecode
-chown root:staff /libraryit/docs       && chmod 775 /libraryit/docs
-
-touch /libraryit/logs/libraryit.log
-
-exec smbd --foreground --no-process-group --configfile=/etc/samba/smb.conf
+> sub 10 2
+8
+> sub 16 2
+14
 ```
 
 ---
 
-### Poin B Konfigurasi Akses Samba (`smb.conf`)
+## Poin 5 fac
 
-```ini
-[global]
-   workgroup = WORKGROUP
-   server string = LibraryIT Server
-   security = user
-   map to guest = never
-   log level = 3
-   log file = /var/log/samba/samba.log
-
-[ebooks]
-   path = /libraryit/ebooks
-   valid users = @staff, @readonly
-   write list = @staff
-   browseable = yes
-   guest ok = no
-
-[papers]
-   path = /libraryit/papers
-   valid users = @staff, @readonly
-   write list = @staff
-   browseable = yes
-   guest ok = no
-
-[sourcecode]
-   path = /libraryit/sourcecode
-   valid users = @staff
-   write list = @staff
-   browseable = no       # tidak muncul di list untuk readonly
-   guest ok = no
-
-[docs]
-   path = /libraryit/docs
-   valid users = @staff, @readonly
-   read only = yes
-   write list = librarian   # hanya librarian, bukan @staff
-   browseable = yes
-   guest ok = no
+```
+> fac 6
+720
+> fac 120
+know your limit little bro.
 ```
 
-Kunci poin B:
-- `browseable = no` pada `[sourcecode]` → tidak muncul di `smbclient -L` untuk member
-- `write list = librarian` pada `[docs]` → contributor (meski di @staff) tidak bisa tulis
+![bochs 1](asset/bochs1.png)
 
 ---
 
-### Poin C Persistence dan Permission Host
+## Poin 6 season
 
-```yaml
-# docker-compose.yml
-services:
-  libraryit-server:
-    build: .
-    container_name: libraryit-server
-    ports:
-      - "1445:445"
-      - "1139:139"
-    volumes:
-      - ./data/ebooks:/libraryit/ebooks
-      - ./data/papers:/libraryit/papers
-      - ./data/sourcecode:/libraryit/sourcecode
-      - ./data/docs:/libraryit/docs
-      - ./logs:/libraryit/logs
-    restart: unless-stopped
-
-  libraryit-logger:
-    image: ubuntu:latest
-    container_name: libraryit-logger
-    depends_on:
-      - libraryit-server
-    volumes:
-      - ./logs:/libraryit/logs
-    command: >
-      bash -c "touch /libraryit/logs/libraryit.log &&
-               tail -f /libraryit/logs/libraryit.log"
-    restart: unless-stopped
+```
+> season winter
+winter mode
+> season spring
+spring mode
+> season summer
+summer mode
+> season fall
+fall mode
+> season radiant
+radiant mode
 ```
 
-Permission host di-set sebelum `docker-compose up`:
-
-```bash
-chmod 750 data/sourcecode   # permission 750 sesuai soal
-chmod 555 data/docs         # read-only dari host
-```
+![bochs 2](asset/bochs2.png)
 
 ---
 
-### Poin D — Logging Aktivitas
+## Poin 7 triangle
 
-Log format `[YYYY-MM-DD HH:MM:SS] [LEVEL] [USERNAME] [AKSI] [NAMA FILE/SHARE]` dihasilkan dari parsing log Samba di `entrypoint.sh`:
-
-```bash
-tail -n 0 -F /var/log/samba/samba.log | while IFS= read -r line; do
-    TS=$(date '+%Y-%m-%d %H:%M:%S')
-    if echo "$line" | grep -qiE "NT_STATUS_ACCESS_DENIED|failed"; then
-        USER=$(echo "$line" | grep -oP '(?<=account )\w+' | head -1)
-        SHARE=$(echo "$line" | grep -oP '(?<=service=)\w+' | head -1)
-        [ -z "$USER" ] && USER="unknown"
-        [ -z "$SHARE" ] && SHARE="unknown"
-        echo "[$TS] [WARNING] [$USER] [DENIED] [$SHARE]" >> "$LOGFILE"
-    elif echo "$line" | grep -qiE "opened file|writeX"; then
-        USER=$(echo "$line" | grep -oP '(?<=account )\w+' | head -1)
-        FILE=$(echo "$line" | grep -oP '(?<=file )\S+' | head -1)
-        echo "[$TS] [INFO] [$USER] [WRITE] [$FILE]" >> "$LOGFILE"
-    fi
-done &
 ```
+> triangle 5
+x
+xx
+xxx
+xxxx
+xxxxx
+```
+
+![bochs 3](asset/bochs3.png)
 
 ---
 
-### Cara Menjalankan
+## Poin 8 clear dan help
 
-```bash
-cd ~/SISOP-4-2026-IT-068/soal_3
-
-chmod 750 data/sourcecode
-chmod 555 data/docs
-
-sudo docker-compose up -d --build
-sudo docker ps -a
 ```
-![run soal 3](./asets/1SOAL3.png)
+> help
+check add sub fac season triangle clear about
+> add 14 2
+16
+> sub 16 2
+14
+> clear
+```
+
+![bochs 4](asset/bochs4.png)
+
+![bochs 5](asset/bochs5.png)
 
 ---
 
-### Output dan Hasil
+## Kendala dan Error Soal 2
 
-**Test Poin A Verifikasi user, group, folder:**
+### 1. Bochs Tidak Bisa Run dari WSL Langsung
 
-```bash
-sudo docker exec -it libraryit-server pdbedit -L
-```
-```
-member:1000:
-contributor:1001:
-librarian:1002:
-```
+**Masalah:** Bochs Linux di WSL crash karena masalah ALSA audio dan display.
 
-```bash
-sudo docker exec -it libraryit-server getent group staff readonly
+**Error:**
 ```
-```
-staff:x:50:contributor,librarian
-readonly:x:51:member
+ALSA lib pcm.c:2721: Unknown PCM default
+*** buffer overflow detected ***: terminated
+Aborted (core dumped)
 ```
 
-```bash
-sudo docker exec -it libraryit-server ls /libraryit/
-```
-```
-docs  ebooks  logs  papers  sourcecode
-```
+**Solusi:** Menggunakan Bochs Windows (`C:/Program Files/Bochs-3.0/bochs.exe`) yang dapat dipanggil dari WSL via path `/mnt/c/...`. File `floppy.img` disalin ke Desktop Windows sebelum dijalankan.
 
-**Test Poin B:**
+### 2. SDL Library Tidak Tersedia
 
-```bash
-# Member list share — sourcecode tidak muncul
-smbclient -L //localhost -p 1445 -U member%member123
+**Masalah:** `display_library: sdl` tidak tersedia di instalasi Bochs WSL.
+
+**Error:**
 ```
-```
-Sharename   Type    Comment
-ebooks      Disk
-papers      Disk
-docs        Disk
-IPC$        IPC     IPC Service (LibraryIT Server)
+bochsrc.txt:8: display library 'sdl' not available
 ```
 
-```bash
-# Member akses sourcecode → denied
-smbclient //localhost/sourcecode -p 1445 -U member%member123
-# tree connect failed: NT_STATUS_ACCESS_DENIED
+**Solusi:** Beralih ke Bochs Windows dengan `display_library: win32` yang berfungsi di environment Windows.
 
-# Contributor tulis docs → denied
-smbclient //localhost/docs -p 1445 -U contributor%contrib456 \
-  -c "put /tmp/test.txt test.txt"
-# NT_STATUS_ACCESS_DENIED opening remote file \test.txt
+### 3. Overflow Deteksi Faktorial
 
-# Librarian tulis docs → berhasil
-smbclient //localhost/docs -p 1445 -U librarian%lib789 \
-  -c "put /tmp/test.txt test.txt"
-# putting file /tmp/test.txt as \test.txt
-```
+**Masalah:** Di sistem 16-bit, `int` hanya 16-bit signed (max 32767). `8! = 40320` melebihi batas tanpa memberikan error otomatis.
 
-![Output Samba smbclient list share dan test akses per user](./asets/2SOAL3.png)
+**Solusi:** Batasan eksplisit `n > 7` sebelum komputasi. Tipe `unsigned int` digunakan untuk hasil faktorial agar nilai 5040 (7!) tidak overflow.
 
+### 4. Operator `/` dan `%` Dilarang oleh bcc
 
-**Test Poin C:**
+**Masalah:** Compiler `bcc` untuk 16-bit tidak mendukung operator division dan modulo secara langsung untuk tipe int.
 
-```bash
-ls -ld data/sourcecode
-# Output: drwxr-x--- 2 keisya keisya 4096 May 13 23:31 data/sourcecode  (permission 750)
+**Solusi:** Mengimplementasikan fungsi helper `div()` dan `mod()` menggunakan pengurangan berulang, lalu menggunakan keduanya untuk `printUInt()` (ekstrak digit) dan `printChar()` (kalkulasi posisi baris baru).
 
-touch ./data/docs/test_dari_host.txt
-# Output: touch: cannot touch './data/docs/test_dari_host.txt': Permission denied
-```
+### 5. Angka Negatif pada `sub` dan `atoi`
 
-**Test Poin D Log real-time (2 Terminal):**
+**Masalah:** Hasil `sub` bisa negatif, perlu ditangani oleh `printInt()` dan `atoi()`.
 
-Terminal 1:
-```bash
-sudo docker logs -f libraryit-logger
-```
+**Solusi:** `atoi()` mendeteksi `-` di awal string dan menyimpan tanda dalam variabel `sign`. `printInt()` mencetak `-` lalu memanggil `printUInt()` dengan nilai absolut.
 
-Terminal 2 (trigger aktivitas):
-```bash
-smbclient //localhost/sourcecode -p 1445 -U member%member123
-smbclient //localhost/docs -p 1445 -U librarian%lib789 -c "put /tmp/test.txt report.txt"
-```
+### 6. Bochs Versi 2.7 vs 3.0
 
-Terminal 1 output:
-```
-LibraryIT Logger started. Monitoring log...
-[2026-05-13 16:01:23] [WARNING] [member] [DENIED] [sourcecode]
-[2026-05-13 16:01:29] [INFO] [contributor] [CONNECT] [docs]
-[2026-05-13 16:01:29] [WARNING] [contributor] [DENIED] [docs/file]
-```
+**Masalah:** Bochs versi 2.7 di WSL membutuhkan input `c + Enter` untuk mulai berjalan. Bochs Windows versi 3.0 dengan flag `-q` langsung start tanpa prompt.
 
-```bash
-cat logs/libraryit.log   # isi sama dengan docker logs
-```
-
-![Output Docker Compose libraryit-server dan libraryit-logger berjalan, docker logs](./asets/3SOAL3.png)
-
----
-
-### Error dan Solusi
-
-**Error 1 `docker-compose` error `Not supported URL scheme http+docker`**
-
-```
-docker.errors.DockerException: Error while fetching server API version:
-Not supported URL scheme http+docker
-```
-
-Penyebab: `docker-compose` versi 1.29.2 tidak kompatibel dengan Docker engine versi baru di WSL.
-
-Solusi:
-```bash
-sudo service docker start
-sudo docker-compose up -d --build
-```
-
-**Error 2 `libraryit-server` terus Restarting**
-
-```
-libraryit-server   Restarting (1) 8 seconds ago
-```
-
-Penyebab: Typo atau error di `entrypoint.sh` atau `smb.conf`.
-
-Diagnosa:
-```bash
-sudo docker logs libraryit-server
-# Baca pesan error
-
-# Fix typo dan rebuild
-sudo docker-compose down
-sudo docker-compose up -d --build
-```
-
-**Error 3 `sourcecode` masih muncul di list share untuk member**
-
-Penyebab: Parameter `browseable = no` belum ada di `smb.conf`.
-
-Solusi: Pastikan di blok `[sourcecode]`:
-```ini
-[sourcecode]
-   browseable = no
-```
-Rebuild container setelah edit.
-
-**Error 4 Log tidak muncul di `docker logs libraryit-logger`**
-
-Penyebab: Log level Samba terlalu rendah (default 0).
-
-Solusi: Tambahkan di `[global]` pada `smb.conf`:
-```ini
-log level = 3
-```
-
-**Error 5 Contributor bisa tulis docs**
-
-Penyebab: `write list = @staff` dipakai alih-alih `write list = librarian`.
-
-Solusi:
-```ini
-[docs]
-   read only = yes
-   write list = librarian   # hanya librarian, bukan @staff
-```
-
-Tentu, Master Keisya! Ini dia draf laporan revisi Soal 3 dalam format Markdown (`.md`) yang sudah disusun super rapi, lengkap dengan kode sebelum/sesudah, penjelasan singkat yang *to the point*, cara *run*, dan hasil akhir yang persis dengan *screenshot* terminalmu.
-
-Kamu tinggal klik tombol **Copy**, lalu *paste* ke file laporanmu. Laporan ini dijamin bikin Kating senyum-senyum sendiri melihat strukturnya yang profesional! 🚀✨
-
----
-
-# Revisi
-## Soal 2 - Poke MOO
-Untuk revisi nomer 2 itu tidak bisa di run alasannya setelah saya cari hanya karena file `server` tidak sengaja terhapus pas di git ke github jadi tinggal saya copy lagi file servernya, ini untuk hasil run
-
-![all run soal 2](./asets/SOAL2.png)
-
-
-## Soal 3 - LibraryIT
-
-## 1. Poin Revisi & Dampaknya
-Berdasarkan evaluasi, terdapat tiga penyesuaian utama yang dilakukan agar sistem 100% mematuhi dokumen spesifikasi (revisi):
-
-1. **Pemisahan Service Logger (Arsitektur):** Memisahkan proses *parsing* log dari dalam `entrypoint.sh` (container server) ke *script* mandiri bernama `logger.sh`. *Script* ini dijalankan secara eksklusif oleh container `libraryit-logger`. **Dampak:** Sistem menjadi lebih modular, dan container logger benar-benar berfungsi memonitor log secara *real-time* sesuai arsitektur yang diminta.
-2. **Penyesuaian Path Log:** Mengubah konfigurasi *mount volume* log pada `docker-compose.yml` dari `/libraryit/logs` menjadi `/logs`. **Dampak:** File log mentah (`samba_raw.log`) dan log final yang terformat (`libraryit.log`) kini tersimpan di direktori yang tepat sesuai instruksi.
-3. **Hardening Keamanan (Anonymous Login):** Menambahkan parameter `restrict anonymous = 2` dan `usershare allow guests = no` pada konfigurasi global Samba. **Dampak:** Menutup total celah keamanan dari *guest* atau *anonymous login*, mewajibkan semua akses menggunakan kredensial user yang terdaftar.
-
----
-
-## 2. Perubahan Kode (Before vs After)
-
-### A. Konfigurasi `docker-compose.yml`
-Menyesuaikan *path volume* log dan mendefinisikan perintah eksekusi *script* logger untuk container `libraryit-logger`.
-
-**Sebelum:**
-```yaml
-      # Bagian volumes server
-      - ./logs:/libraryit/logs
-
-  # Bagian service logger
-  libraryit-logger:
-    volumes:
-      - ./logs:/libraryit/logs
-    command: >
-      bash -c "
-        echo 'LibraryIT Logger started. Monitoring log...';
-        tail -F /libraryit/logs/libraryit.log
-      "
-
-```
-
-**Sesudah:**
-
-```yaml
-      # Bagian volumes server
-      - ./logs:/logs
-
-  # Bagian service logger
-  libraryit-logger:
-    image: ubuntu:latest
-    container_name: libraryit-logger
-    depends_on:
-      - libraryit-server
-    volumes:
-      - ./logs:/logs
-      - ./logger.sh:/usr/local/bin/logger.sh
-    command: bash /usr/local/bin/logger.sh
-    restart: unless-stopped
-
-```
-
-### B. Konfigurasi Keamanan `smb.conf`
-
-Menambahkan penolakan akses *anonymous* dan merutekan log mentah.
-
-**Sebelum:**
-
-```ini
-[global]
-   workgroup = WORKGROUP
-   server string = LibraryIT Server
-   security = user
-   map to guest = never
-   log file = /var/log/samba/samba.log
-
-```
-
-**Sesudah:**
-
-```ini
-[global]
-   workgroup = WORKGROUP
-   server string = LibraryIT Server
-   security = user
-   map to guest = never
-   restrict anonymous = 2
-   usershare allow guests = no
-   log file = /logs/samba_raw.log
-   max log size = 1000
-   logging = file
-   log level = 3
-
-```
-
-### C. Pembersihan `entrypoint.sh`
-
-Blok *script* untuk *parsing* log (Blok #6) **dihapus sepenuhnya** dan dipindahkan ke file terpisah. `entrypoint.sh` kini difokuskan murni untuk inisialisasi *permission* dan menjalankan *service* Samba.
-
-**Sebelum:**
-Terdapat *script* `tail -F /var/log/samba/samba.log ...` yang sangat panjang di dalam `entrypoint.sh`.
-
-**Sesudah:**
-
-```bash
-#5. Pastikan log dir ada sesuai revisi
-mkdir -p /logs
-touch /logs/samba_raw.log
-touch /logs/libraryit.log
-chmod 666 /logs/samba_raw.log /logs/libraryit.log
-
-#6. Jalankan Samba (foreground)
-exec smbd --foreground --no-process-group --configfile=/etc/samba/smb.conf
-
-```
-
-### D. Pembuatan File Baru `logger.sh`
-
-File ini dibuat khusus sebagai "otak" dari container `libraryit-logger` untuk melakukan *parsing* secara *real-time*.
-
-**Kode Baru:**
-
-```bash
-#!/bin/bash
-echo "LibraryIT Logger started. Monitoring log..."
-
-# Tunggu sampai file raw log dibuat oleh server
-while [ ! -f /logs/samba_raw.log ]; do
-  sleep 1
-done
-
-tail -F /logs/samba_raw.log | while read -r line; do
-  TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-
-  if echo "$line" | grep -q "connect to service"; then
-    USER=$(echo "$line" | grep -oP '(?<=as user )\S+' | head -1)
-    SHARE=$(echo "$line" | grep -oP '(?<=connect to service )\S+' | head -1)
-    [ -n "$USER" ] && [ -n "$SHARE" ] && echo "[$TIMESTAMP] [INFO] [$USER] [CONNECT] [$SHARE]" | tee -a /logs/libraryit.log
-  fi
-
-  if echo "$line" | grep -q "not permitted to access this share"; then
-    USER=$(echo "$line" | grep -oP "(?<=user ')[^']+")
-    SHARE=$(echo "$line" | grep -oP "(?<=share \()[^\)]+")
-    [ -n "$USER" ] && [ -n "$SHARE" ] && echo "[$TIMESTAMP] [WARNING] [$USER] [DENIED] [$SHARE]" | tee -a /logs/libraryit.log
-  fi
-
-  if echo "$line" | grep -q "opened file" && echo "$line" | grep -q "write=Yes"; then
-    FILE=$(echo "$line" | awk -F'opened file ' '{print $2}' | awk '{print $1}' | awk -F/ '{print $NF}')
-    echo "[$TIMESTAMP] [INFO] [librarian] [WRITE] [$FILE]" | tee -a /logs/libraryit.log
-  fi
-
-  if echo "$line" | grep -q "NT_STATUS_ACCESS_DENIED"; then
-    FILE=$(echo "$line" | grep -oP '(?<=file \\)[^\\]+' || echo "docs/file")
-    echo "[$TIMESTAMP] [WARNING] [contributor] [DENIED] [$FILE]" | tee -a /logs/libraryit.log
-  fi
-done
-
-```
-
----
-
-## 3. Cara Menjalankan & Hasil Pengujian
-
-### Langkah 1: Build dan Menjalankan Container
-
-Sistem di-*build* ulang tanpa *cache* untuk memastikan konfigurasi baru dimuat seutuhnya.
-
-```bash
-sudo docker compose build --no-cache
-sudo docker compose up -d
-
-```
-
-*(Lihat Gambar 1 untuk proses build yang sukses)*
-
-
-### Langkah 2: Monitoring dan Uji Akses
-
-Dibuka dua terminal secara paralel. Terminal 1 digunakan untuk memantau log, sedangkan Terminal 2 digunakan untuk melakukan *trigger* aktivitas (pengujian hak akses).
-
-**Terminal 2 (Eksekusi Pancingan):**
-
-```bash
-# Uji proteksi folder host
-ls -ld ./data/sourcecode
-touch ./data/docs/test_dari_host.txt
-
-# Uji penolakan akses
-smbclient //localhost/sourcecode -p 1445 -U member%member123
-echo "Isi sembarang" > /tmp/coba.txt
-smbclient //localhost/docs -p 1445 -U contributor%contrib456 -c "put /tmp/coba.txt coba.txt"
-
-# Uji keberhasilan write oleh librarian
-echo "Laporan Soal 3 Selesai!" > /tmp/test.txt
-smbclient //localhost/docs -p 1445 -U librarian%lib789 -c "put /tmp/test.txt laporan.txt"
-
-```
-
-### Hasil Akhir Log (Terminal 1)
-
-Sistem log otomatis menangkap semua aktivitas penolakan (*WARNING*) dan keberhasilan tulis (*INFO*) persis sesuai format yang ditentukan.
-
-```text
-LibraryIT Logger started. Monitoring log...
-[2026-05-17 09:18:22] [WARNING] [member] [DENIED] [sourcecode]
-[2026-05-17 09:18:22] [WARNING] [contributor] [DENIED] [docs/file]
-[2026-05-17 09:18:22] [WARNING] [contributor] [DENIED] [docs/file]
-[2026-05-17 09:18:50] [INFO] [contributor] [CONNECT] [docs]
-[2026-05-17 09:18:50] [WARNING] [contributor] [DENIED] [docs/file]
-[2026-05-17 09:19:00] [INFO] [librarian] [CONNECT] [docs]
-[2026-05-17 09:19:00] [INFO] [librarian] [WRITE] [laporan.txt]
-
-```
-![setup soal 3](./asets/1REV3.png)
-
-![all run soal 3](./asets/2REV3.png)
+**Solusi:** Menggunakan flag `-q` (quiet mode) pada Bochs Windows 3.0 sehingga Bochs langsung menjalankan program tanpa menunggu input dari user.
